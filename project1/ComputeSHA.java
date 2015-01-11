@@ -14,10 +14,10 @@ public class ComputeSHA {
         }
     }
 
-    public void parseFile(String file) throws FileNotFoundException, IOException {
+    public void parseFile(String file) throws IOException {
         try {
             inputStream = new FileInputStream(file);
-            int nread = 0;
+            int nread;
             byte[] data = new byte[1024];
 
             while ((nread = inputStream.read(data)) != -1) {
