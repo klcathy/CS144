@@ -1,15 +1,16 @@
 Part B
 -------
-1. Item(ItemID PRIMARY KEY, Name, Currently, First_Bid, Buy_Price, Num_Bids, Started, Ends, Description, SellerID)
-   ItemCategory(ItemID, Category) // not sure what primary key is 
-   User(UserID PRIMARY KEY, Location, Country)
-   Seller(UserID refs User(UserID), Rating)
-   Buyer(UserID refs User(UserID), Rating)
-   Bid(ItemID refs Item(ItemID), BidderID refs User(UserID), Time, Amount, (ItemID, BidderID, Time) PRIMARY KEY)
+1. Item(ItemID PRIMARY KEY, Name, Currently, First_Bid, Buy_Price, Num_Bids, Started, Ends, Description,
+      SellerID refs Seller(SellerID), Location, Country, Longitude?, Latitude?)
+   ItemCategory(ItemID, Category)
+   Seller(SellerID, Rating)
+   Bidder(BidderID, Rating, Location, Country)
+   Bid(ItemID refs Item(ItemID), BidderID refs Bidder(BidderID), Time, Amount, (ItemID, BidderID, Time) PRIMARY KEY)
 
-2. ItemID -> Name, Currently, First_Bid, Buy_Price, Num_Bids, Started, Ends, SellerID, Description
+2. // Need to update relations
+   ItemID -> Name, Currently, First_Bid, Buy_Price, Num_Bids, Started, Ends, SellerID, Description
    ItemID, UserID, Time -> Amount
-   UserID -> Rating, Location, Country
+   UserID -> Rating, Location, Country // need to change
    ItemID -> Category // ??
 
 3. Yes
