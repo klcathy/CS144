@@ -406,8 +406,8 @@ class MyParser {
 
             Bidder newBidder;
             Bid newBid;
-
             for (Element bid : bids) {
+
                 // Construct the Bidder for current Bid
                 Element bidder = getElementByTagNameNR(bid, "Bidder");
                 String bidder_id = bidder.getAttribute("UserID");
@@ -426,9 +426,8 @@ class MyParser {
                 bidderHT.put(bidder_id, newBidder);
                 bidHT.put(bid_id, newBid);
 
-                // Reset variables????
             }
-
+            
             itemHT.put(item_id, newItem);
             itemCategoryHT.put(item_id, newItemCategory);
             sellerHT.put(userID, seller);
