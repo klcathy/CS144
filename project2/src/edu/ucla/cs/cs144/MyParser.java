@@ -43,7 +43,8 @@ import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.util.Date;
 
-class ItemClass {
+class Item {
+    long itemId;
     String name;
     String currently;
     String first_bid;
@@ -57,15 +58,56 @@ class ItemClass {
     String country;
     Double longitude;
     Double latitude;
+
+    public Item(long id) {
+        this.itemId = id;
+    }
+
+    public void setRequiredAttributes(String name, String currentBid, String first_bid,
+                                      int num_bids, String startTime, String endTime,
+                                      String desc, String location, String country) {
+        this.name = name;
+        this.currently = currentBid;
+        this.first_bid = first_bid;
+        this.num_bids = num_bids;
+        this.started = startTime;
+        this.ends = endTime;
+        this.description = desc;
+        this.location = location;
+        this.country = country;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setBuyPrice(String buyPrice) {
+        this.buy_price = buyPrice;
+    }
+
+    public String toString() {
+        String buyStr = (buy_price != null) ? String.valueOf(buy_price) : "\\N";
+        String longitudeStr = (longitude != null) ? String.valueOf(this.longitude) : "\\N";
+        String latitudeStr = (latitude != null) ? String.valueOf(this.latitude) : "\\N";
+
+        return itemId + "\t" + name + "\t" + currently + "\t" + first_bid + "\t" +
+                buyStr + "\t" + num_bids + "\t" + started + "\t" + ends + "\t" +
+                description + "\t" + location + "\t" + latitudeStr + "\t" +
+                longitudeStr + "\t" + country;
+    }
 }
 
-class BidderClass {
+class Bidder {
     int rating;
     String location;
     String country; 
 }
 
-class BidClass {
+class Bid {
     String bidderID;
     String time;
     String amount;
@@ -76,11 +118,11 @@ class MyParser {
     static final String columnSeparator = "|*|";
     static DocumentBuilder builder;
 
-    static Map<Integer, ItemClass> itemHT = new HashMap<Integer, ItemClass>();
-    static Map<Integer, String[]> itemCategoryHT = new HashMap<Integer, String[]>();
+    static Map<Long, Item> itemHT = new HashMap<Long, Item>();
+    static Map<Long, ArrayList<String>> itemCategoryHT = new HashMap<Long, ArrayList<String>>();
     static Map<String, Integer> sellerHT = new HashMap<String, Integer>();
-    static Map<String, BidderClass> bidderHT = new HashMap<String, BidderClass>();
-    static Map<String, BidClass> bidHT = new HashMap<String, BidClass>();
+    static Map<String, Bidder> bidderHT = new HashMap<String, Bidder>();
+    static Map<String, Bid> bidHT = new HashMap<String, Bid>();
 
     static final String[] typeName = {
 	"none",
@@ -118,21 +160,6 @@ class MyParser {
             System.exit(3);
         }
         
-    }
-
-    // Helper function for reformatting date and time
-    static String formatDate(String str) {
-        SimpleDateFormat parseFormat = new SimpleDateFormat("MMM-dd-yy HH:mm:ss");
-        SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String outputDate = new String();
-        try {
-            Date parsed = parseFormat.parse(str);
-            outputDate = outputFormat.format(parsed);
-        }
-        catch (ParseException pe) {
-            System.out.println("ERROR: Cannot parse \"" + str + "\"");
-        }
-        return outputDate;
     }
     
     /* Non-recursive (NR) version of Node.getElementsByTagName(...)
@@ -208,6 +235,40 @@ class MyParser {
             return nf.format(am).substring(1);
         }
     }
+
+    /*  Writes the contents of a map to a tab-delimited file.
+     */
+    static void writeMapToFile(String filename, HashMap<Object, Object> map) {
+        try {
+            FileWriter writer = new FileWriter(filename, true);
+            PrintWriter printer = new PrintWriter(writer);
+            for (Object o : map.values()) {
+                printer.print(o);
+                printer.println();
+            }
+            printer.close();
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("Error printing tab-delimited file!");
+        }
+    }
+
+    /*  Parses the date in the xml and returns a new formatted date
+        suitable for mySQL.
+     */
+    static String formatDate(String str) {
+        SimpleDateFormat parseFormat = new SimpleDateFormat("MMM-dd-yy HH:mm:ss");
+        SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String outputDate = "";
+        try {
+            Date parsed = parseFormat.parse(str);
+            outputDate = outputFormat.format(parsed);
+        }
+        catch (ParseException pe) {
+            System.out.println("ERROR: Cannot parse \"" + str + "\"");
+        }
+        return outputDate;
+    }
     
     /* Process one items-???.xml file.
      */
@@ -234,69 +295,75 @@ class MyParser {
         /* Fill in code here (you will probably need to write auxiliary
             methods). */
         Element root = doc.getDocumentElement();
-        // store 1 xml doc into item hashmap
+
+        // Get all Item children of Items
         Element[] items = getElementsByTagNameNR(root, "Item");
 
-        for (int i = 0; i < items.length; i ++) {
-            int item_id = Integer.parseInt(items[i].getAttribute("ItemID"));
+        for (Element item : items) {
+            long item_id = Integer.parseInt(item.getAttribute("ItemID"));
 
-            // Get attributes of Item
-            ItemClass ic = new ItemClass();
-            ic.name = getElementTextByTagNameNR(items[i], "Name");
-            ic.currently = strip(getElementTextByTagNameNR(items[i], "Currently"));
-            ic.first_bid = strip(getElementTextByTagNameNR(items[i], "First_Bid"));
-            ic.buy_price = strip(getElementTextByTagNameNR(items[i], "Buy_Price"));
-            ic.num_bids = Integer.parseInt(getElementTextByTagNameNR(items[i], "Number_of_Bids"));
-            ic.started = formatDate(getElementTextByTagNameNR(items[i], "Started"));
-            ic.ends = formatDate(getElementTextByTagNameNR(items[i], "Ends"));
-            ic.description = getElementTextByTagNameNR(items[i], "Description");
-            if ((ic.description).length() > 4000)
-                ic.description = (ic.description).substring(0, 3999); // truncate string to 4000 chars
-            String userID = (getElementByTagNameNR(items[i], "Seller")).getAttribute("UserID");
-            ic.sellerID = userID;
-            ic.location = getElementTextByTagNameNR(items[i], "Location");
-            ic.country = getElementTextByTagNameNR(items[i], "Country");
-            ic.longitude = Double.parseDouble(getElementByTagNameNR(items[i], "Location").getAttribute("Longitude"));
-            ic.latitude = Double.parseDouble(getElementByTagNameNR(items[i], "Location").getAttribute("Latitude"));
+            // Construct the item
+            Item newItem = new Item(item_id);
+            newItem.name = getElementTextByTagNameNR(item, "Name");
+            newItem.currently = strip(getElementTextByTagNameNR(item, "Currently"));
+            newItem.first_bid = strip(getElementTextByTagNameNR(item, "First_Bid"));
+            newItem.buy_price = strip(getElementTextByTagNameNR(item, "Buy_Price"));
+            newItem.num_bids = Integer.parseInt(getElementTextByTagNameNR(item, "Number_of_Bids"));
+            newItem.started = formatDate(getElementTextByTagNameNR(item, "Started"));
+            newItem.ends = formatDate(getElementTextByTagNameNR(item, "Ends"));
+            newItem.description = getElementTextByTagNameNR(item, "Description");
+            if ((newItem.description).length() > 4000)
+                newItem.description = (newItem.description).substring(0, 3999); // truncate string to 4000 chars
+            String userID = (getElementByTagNameNR(item, "Seller")).getAttribute("UserID");
+            newItem.sellerID = userID;
+            newItem.location = getElementTextByTagNameNR(item, "Location");
+            newItem.country = getElementTextByTagNameNR(item, "Country");
+            newItem.longitude = Double.parseDouble(getElementByTagNameNR(item, "Location").getAttribute("Longitude"));
+            newItem.latitude = Double.parseDouble(getElementByTagNameNR(item, "Location").getAttribute("Latitude"));
 
             // Get attributes of ItemCategory
-            Element[] category = getElementsByTagNameNR(items[i], "Category");
-            String[] category_str = new String[category.length];
+            Element[] categories = getElementsByTagNameNR(item, "Category");
+            ArrayList<String> category_list = new ArrayList<String>();
 
-            for (int j = 0; j < category.length; j++) {
-                category_str[j] = category[j].getTextContent();
+            for (Element category : categories) {
+                category_list.add(category.getTextContent());
             }
 
             // Get attributes of Seller
-            int seller_rating = Integer.parseInt((getElementByTagNameNR(items[i], "Seller")).getAttribute("Rating"));
+            int seller_rating = Integer.parseInt((getElementByTagNameNR(item, "Seller")).getAttribute("Rating"));
 
-            // Get attributes of bidder
-            BidderClass bdc = new BidderClass();
-            Element bids = getElementByTagNameNR(items[i], "Bids");
-            Element[] bids_arr = getElementsByTagNameNR(bids, "Bid");
+            // Get all Bid children of Bids
+            Element bidsRoot = getElementByTagNameNR(item, "Bids");
+            Element[] bids = getElementsByTagNameNR(bidsRoot, "Bid");
 
-            BidClass bc = new BidClass();
+            Bidder newBidder = new Bidder();
+            Bid newBid = new Bid();
 
-            for (int k = 0; k < bids_arr.length; k++) {
-                Element bidder = getElementByTagNameNR(bids_arr[k], "Bidder");
+            for (Element bid : bids) {
+                // Get attributes of the bidder
+                Element bidder = getElementByTagNameNR(bid, "Bidder");
                 String bidder_id = bidder.getAttribute("UserID");
-                bdc.rating =  Integer.parseInt(bidder.getAttribute("Rating"));
-                bdc.location = getElementTextByTagNameNR(bidder, "Location");
-                bdc.country = getElementTextByTagNameNR(bidder, "Country");
-                bidderHT.put(bidder_id, bdc);
+                newBidder.rating =  Integer.parseInt(bidder.getAttribute("Rating"));
+                newBidder.location = getElementTextByTagNameNR(bidder, "Location");
+                newBidder.country = getElementTextByTagNameNR(bidder, "Country");
+                bidderHT.put(bidder_id, newBidder);
 
-                // Get attributes of bid
-                String time = formatDate(getElementTextByTagNameNR(bids_arr[k], "Time"));
-                bc.time = time;
-                bc.amount = strip(getElementTextByTagNameNR(bids_arr[k], "Amount"));
-                bc.bidderID = bidder_id;
-                String bid_id = bidder_id + Integer.toString(item_id) + time;
-                bidHT.put(bid_id, bc);
+                // Get attributes of the bid
+                String time = formatDate(getElementTextByTagNameNR(bid, "Time"));
+                newBid.time = time;
+                newBid.amount = strip(getElementTextByTagNameNR(bid, "Amount"));
+                newBid.bidderID = bidder_id;
+                String bid_id = bidder_id + Long.toString(item_id) + time;
+                bidHT.put(bid_id, newBid);
+
+                // Reset variables???
             }
 
-            itemHT.put(item_id, ic);
-            itemCategoryHT.put(item_id, category_str);
+            itemHT.put(item_id, newItem);
+            itemCategoryHT.put(item_id, category_list);
             sellerHT.put(userID, seller_rating);
+            HashMap<Object, Object> map = new HashMap<Object, Object>(itemHT);
+            writeMapToFile("items.dat", map);
         }
 
         /*
@@ -315,7 +382,7 @@ class MyParser {
         */
 
         /*
-        for(Map.Entry<Integer, ItemClass> entry : itemHT.entrySet()) {
+        for(Map.Entry<Integer, Item> entry : itemHT.entrySet()) {
             int id = entry.getKey();
             System.out.println(id);
             System.out.println((itemHT.get(id)).name);
