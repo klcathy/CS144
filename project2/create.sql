@@ -8,24 +8,24 @@ CREATE TABLE Item (ItemID int,
 				   Ends timestamp,
 				   Description varchar(4000),
 				   SellerID varchar(4000),
-				   PRIMARY KEY(ItemID))
+				   PRIMARY KEY(ItemID));
 
 CREATE TABLE ItemCategory (ID int,
 						   category varchar(4000),
-						  FOREIGN KEY (ID) references Item(ItemID))
+						  FOREIGN KEY (ID) references Item(ItemID));
 
 CREATE TABLE User (UserID int,
 				   Location varchar(4000),
 				   Country varchar(4000),
-				   PRIMARY KEY(UserID))
+				   PRIMARY KEY(UserID));
 
 CREATE TABLE Seller (UID int,
 				     Rating int,
-				     FOREIGN KEY (UID) references User(UserID))
+				     FOREIGN KEY (UID) references User(UserID));
 
 CREATE TABLE Buyer (UID int,
 					Rating int.
-					FOREIGN KEY (UID) references User(UserID))
+					FOREIGN KEY (UID) references User(UserID));
 
 CREATE TABLE Bid (IID int,
 				  BidderID int,
@@ -33,4 +33,4 @@ CREATE TABLE Bid (IID int,
 				  Amount decimal(8,2),
 				  PRIMARY KEY(IID, BidderID, Time),
 				  FOREIGN KEY (IID) references Item(ItemID),
-				  FOREIGN KEY (BidderID) references User(UserID))
+				  FOREIGN KEY (BidderID) references User(UserID));
