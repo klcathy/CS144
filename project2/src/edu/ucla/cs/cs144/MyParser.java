@@ -39,7 +39,6 @@ import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.ErrorHandler;
-<<<<<<< HEAD
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
@@ -56,22 +55,15 @@ class itemClass {
     String description;
     String sellerID;
 }
-=======
-
->>>>>>> fb5ab5ecc89a88538ad9910d7532cf5e35a370e9
 
 class MyParser {
     
     static final String columnSeparator = "|*|";
     static DocumentBuilder builder;
-<<<<<<< HEAD
 
     static Map<Integer, itemClass> itemHT = new HashMap<Integer, itemClass>();
     static Map<Integer, String> itemCategoryHT = new HashMap<Integer, String>();
 
-=======
-    
->>>>>>> fb5ab5ecc89a88538ad9910d7532cf5e35a370e9
     static final String[] typeName = {
 	"none",
 	"Element",
@@ -109,7 +101,6 @@ class MyParser {
         }
         
     }
-<<<<<<< HEAD
 
     // Helper function for reformatting date and time
     static String formatDate(String str) {
@@ -125,8 +116,6 @@ class MyParser {
         }
         return outputDate;
     }
-=======
->>>>>>> fb5ab5ecc89a88538ad9910d7532cf5e35a370e9
     
     /* Non-recursive (NR) version of Node.getElementsByTagName(...)
      */
@@ -226,7 +215,6 @@ class MyParser {
         
         /* Fill in code here (you will probably need to write auxiliary
             methods). */
-<<<<<<< HEAD
         Element root = doc.getDocumentElement();
         // store 1 xml doc into item hashmap
         Element[] items = getElementsByTagNameNR(root, "Item");
@@ -263,10 +251,6 @@ class MyParser {
             System.out.println((itemHT.get(id)).description);
             System.out.println((itemHT.get(id)).sellerID);
         }
-=======
-        
-        
->>>>>>> fb5ab5ecc89a88538ad9910d7532cf5e35a370e9
         
         /**************************************************************/
         
