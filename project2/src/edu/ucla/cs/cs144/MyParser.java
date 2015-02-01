@@ -56,8 +56,8 @@ class Item {
     String sellerID;
     String location;
     String country;
-    Double longitude;
-    Double latitude;
+    String longitude;
+    String latitude;
 
     public Item(long id) {
         this.itemId = id;
@@ -77,22 +77,23 @@ class Item {
         this.country = country;
     }
 
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
-
-    public void setLatitude(double latitude) {
+    public void setLatitudeLongitude(String latitude, String longitude) {
         this.latitude = latitude;
+        this.longitude = longitude;
     }
 
     public void setBuyPrice(String buyPrice) {
         this.buy_price = buyPrice;
     }
 
+    public void setSellerID(String id) {
+        this.sellerID = id;
+    }
+
     public String toString() {
         String buyStr = (buy_price != null) ? String.valueOf(buy_price) : "\\N";
-        String longitudeStr = (longitude != null) ? String.valueOf(this.longitude) : "\\N";
-        String latitudeStr = (latitude != null) ? String.valueOf(this.latitude) : "\\N";
+        String longitudeStr = (longitude != null) ? longitude : "\\N";
+        String latitudeStr = (latitude != null) ? latitude : "\\N";
 
         return itemId + "\t" + name + "\t" + currently + "\t" + first_bid + "\t" +
                 buyStr + "\t" + num_bids + "\t" + started + "\t" + ends + "\t" +
@@ -183,10 +184,13 @@ class MyParser {
     static DocumentBuilder builder;
 
     static Map<Long, Item> itemHT = new HashMap<Long, Item>();
-    static Map<Long, ItemCategory> itemCategoryHT = new HashMap<Long, ItemCategory>();
+    //static Map<Long, ItemCategory> itemCategoryHT = new HashMap<Long, ItemCategory>();
+    static ArrayList<ItemCategory> categoryList = new ArrayList<ItemCategory>();
     static Map<String, User> sellerHT = new HashMap<String, User>();
     static Map<String, Bidder> bidderHT = new HashMap<String, Bidder>();
-    static Map<String, Bid> bidHT = new HashMap<String, Bid>();
+    // static Map<String, Bid> bidHT = new HashMap<String, Bid>();
+    static ArrayList<Bid> bidList = new ArrayList<Bid>();
+    static int maxDescriptionLength = 4000;
 
     static final String[] typeName = {
 	"none",
@@ -317,6 +321,23 @@ class MyParser {
         }
     }
 
+    /*  Writes the contents of an arraylist to a tab-delimited file.
+     */
+    static void writeListToFile(String filename, ArrayList<Object> list) {
+        try {
+            FileWriter writer = new FileWriter(filename, true);
+            PrintWriter printer = new PrintWriter(writer);
+            for (Object o : list) {
+                printer.print(o);
+                printer.println();
+            }
+            printer.close();
+            writer.close();
+        } catch (IOException e) {
+            System.out.println("Error printing tab-delimited file!");
+        }
+    }
+
     /*  Parses the date in the xml and returns a new formatted date
         suitable for mySQL.
      */
@@ -363,30 +384,35 @@ class MyParser {
         // Get all Item children of Items
         Element[] items = getElementsByTagNameNR(root, "Item");
 
-        int maxDescriptionLength = 4000;
-
         for (Element item : items) {
             long item_id = Integer.parseInt(item.getAttribute("ItemID"));
 
+            // Get all properties of current Item
+            String name = getElementTextByTagNameNR(item, "Name");
+            String currently = strip(getElementTextByTagNameNR(item, "Currently"));
+            String first_bid = strip(getElementTextByTagNameNR(item, "First_Bid"));
+            String buy_price = strip(getElementTextByTagNameNR(item, "Buy_Price"));
+            int num_bids = Integer.parseInt(getElementTextByTagNameNR(item, "Number_of_Bids"));
+            String started = formatDate(getElementTextByTagNameNR(item, "Started"));
+            String ends = formatDate(getElementTextByTagNameNR(item, "Ends"));
+            String description = getElementTextByTagNameNR(item, "Description");
+            if (description.length() > maxDescriptionLength)
+                description = description.substring(0, maxDescriptionLength - 1); // truncate string to 4000 chars
+            description = description.replace("\"", "\\\"");
+            String userID = (getElementByTagNameNR(item, "Seller")).getAttribute("UserID");
+            String loc = getElementTextByTagNameNR(item, "Location");
+            String item_country = getElementTextByTagNameNR(item, "Country");
+
+            Element locationElement = getElementByTagNameNR(item, "Location");
+            String longitude = locationElement.getAttribute("Longitude");
+            String latitude = locationElement.getAttribute("Latitude");
+
             // Construct the current Item
             Item newItem = new Item(item_id);
-            newItem.name = getElementTextByTagNameNR(item, "Name");
-            newItem.currently = strip(getElementTextByTagNameNR(item, "Currently"));
-            newItem.first_bid = strip(getElementTextByTagNameNR(item, "First_Bid"));
-            newItem.buy_price = strip(getElementTextByTagNameNR(item, "Buy_Price"));
-            newItem.num_bids = Integer.parseInt(getElementTextByTagNameNR(item, "Number_of_Bids"));
-            newItem.started = formatDate(getElementTextByTagNameNR(item, "Started"));
-            newItem.ends = formatDate(getElementTextByTagNameNR(item, "Ends"));
-            newItem.description = getElementTextByTagNameNR(item, "Description");
-            if ((newItem.description).length() > maxDescriptionLength)
-                newItem.description = (newItem.description).substring(0, maxDescriptionLength - 1); // truncate string to 4000 chars
-            newItem.description = newItem.description.replace("\"", "\\\"");
-            String userID = (getElementByTagNameNR(item, "Seller")).getAttribute("UserID");
-            newItem.sellerID = userID;
-            newItem.location = getElementTextByTagNameNR(item, "Location");
-            newItem.country = getElementTextByTagNameNR(item, "Country");
-            newItem.longitude = Double.parseDouble(getElementByTagNameNR(item, "Location").getAttribute("Longitude"));
-            newItem.latitude = Double.parseDouble(getElementByTagNameNR(item, "Location").getAttribute("Latitude"));
+            newItem.setRequiredAttributes(name, currently, first_bid, num_bids, started, ends, description, loc, item_country);
+            newItem.setLatitudeLongitude(latitude, longitude);
+            newItem.setBuyPrice(buy_price);
+            newItem.setSellerID(userID);
 
             // Construct ItemCategory object for current Item
             Element[] categories = getElementsByTagNameNR(item, "Category");
@@ -395,19 +421,18 @@ class MyParser {
                 newItemCategory.addCategory(category.getTextContent());
             }
 
-            // Get attributes of Seller
-            User seller = new User(userID);
+            // Construct the Seller
             int seller_rating = Integer.parseInt((getElementByTagNameNR(item, "Seller")).getAttribute("Rating"));
+            User seller = new User(userID);
             seller.setRating(seller_rating);
 
             // Get all Bid children of Bids
             Element bidsRoot = getElementByTagNameNR(item, "Bids");
             Element[] bids = getElementsByTagNameNR(bidsRoot, "Bid");
-
             Bidder newBidder;
             Bid newBid;
-            for (Element bid : bids) {
 
+            for (Element bid : bids) {
                 // Construct the Bidder for current Bid
                 Element bidder = getElementByTagNameNR(bid, "Bidder");
                 String bidder_id = bidder.getAttribute("UserID");
@@ -420,65 +445,33 @@ class MyParser {
                 // Construct the current Bid
                 String time = formatDate(getElementTextByTagNameNR(bid, "Time"));
                 String amount = strip(getElementTextByTagNameNR(bid, "Amount"));
-                String bid_id = Long.toString(item_id) + bidder_id + time;
+                // String bid_id = Long.toString(item_id) + bidder_id + time;
                 newBid = new Bid(Long.toString(item_id), bidder_id, time, amount);
 
                 bidderHT.put(bidder_id, newBidder);
-                bidHT.put(bid_id, newBid);
-
+                bidList.add(newBid);
+                //bidHT.put(bid_id, newBid);
             }
             
             itemHT.put(item_id, newItem);
-            itemCategoryHT.put(item_id, newItemCategory);
+            categoryList.add(newItemCategory);
             sellerHT.put(userID, seller);
         }
 
         HashMap<Object, Object> itemMap = new HashMap<Object, Object>(itemHT);
-        HashMap<Object, Object> itemCategoryMap = new HashMap<Object, Object>(itemCategoryHT);
-        HashMap<Object, Object> bidderMap = new HashMap<Object, Object>(bidderHT);
-        HashMap<Object, Object> bidMap = new HashMap<Object, Object>(bidHT);
         writeMapToFile("items.dat", itemMap);
-        writeMapToFile("itemCategory.dat", itemCategoryMap);
+        ArrayList<Object> itemCategoryList = new ArrayList<Object>(categoryList);
+        writeListToFile("itemCategory.dat", itemCategoryList);
+//      HashMap<Object, Object> itemCategoryMap = new HashMap<Object, Object>(itemCategoryHT);
+//      writeMapToFile("itemCategory.dat", itemCategoryMap);
+        HashMap<Object, Object> bidderMap = new HashMap<Object, Object>(bidderHT);
         writeMapToFile("bidder.dat", bidderMap);
-        writeMapToFile("bid.dat", bidMap);
-
-        /*
-        System.out.println("bidder");
-        for(Map.Entry<String, Integer> entry : bidderHT.entrySet()) {
-            String id = entry.getKey();
-            System.out.println(id);
-            System.out.println(bidderHT.get(id));
-        }
-        System.out.println("Seller");
-        for(Map.Entry<String, Integer> entry : sellerHT.entrySet()) {
-            String id = entry.getKey();
-            System.out.println(id);
-            System.out.println(sellerHT.get(id));
-        }
-        */
-
-        /*
-        for(Map.Entry<Integer, Item> entry : itemHT.entrySet()) {
-            int id = entry.getKey();
-            System.out.println(id);
-            System.out.println((itemHT.get(id)).name);
-            System.out.println((itemHT.get(id)).currently);
-            System.out.println((itemHT.get(id)).first_bid);
-            System.out.println((itemHT.get(id)).buy_price);
-            System.out.println((itemHT.get(id)).num_bids);
-            System.out.println((itemHT.get(id)).started);
-            System.out.println((itemHT.get(id)).ends);
-            System.out.println((itemHT.get(id)).description);
-            System.out.println((itemHT.get(id)).sellerID);
-        }
-        */
-
-        /*
-        //Test itemCategory
-        String[] test = itemCategoryHT.get(1044269494);
-        for (int k = 0; k < test.length; k++)
-            System.out.println(test[k]);
-        */
+        // HashMap<Object, Object> bidMap = new HashMap<Object, Object>(bidHT);
+        // writeMapToFile("bid.dat", bidMap);
+        ArrayList<Object> bidListOutput = new ArrayList<Object>(bidList);
+        writeListToFile("bid.dat", bidListOutput);
+        HashMap<Object, Object> sellerMap = new HashMap<Object, Object>(sellerHT);
+        writeMapToFile("seller.dat", sellerMap);
 
         /**************************************************************/
         
