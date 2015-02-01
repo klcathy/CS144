@@ -5,21 +5,20 @@ FROM ((SELECT sid FROM Seller) UNION (SELECT bid FROM Bidder)) as Users;
 -- Find the number of items in "New York"
 SELECT COUNT(*)
 FROM Item
-WHERE location = 'New York';
+WHERE BINARY location = 'New York';
 
--- Find the number of auctions belonging to exactly four categories
+-- WRONG Find the number of auctions belonging to exactly four categories
 SELECT COUNT(*)
-FROM ItemCategory
-GROUP BY iid
-HAVING COUNT(*) = 4;
+FROM (SELECT iid
+      FROM ItemCategory
+      GROUP BY iid
+      HAVING COUNT(*) = 4) as ItemCount;
 
 -- Find the ID(s) of current (unsold) auction(s) with the highest bid
 SELECT iid
-FROM Item I1
-WHERE  ends > '2001-12-20 00:00:01'
-       AND currently >= ALL (SELECT iid
-                             FROM Item I2
-                             WHERE I1.iid <> I2.iid);
+FROM Item
+WHERE num_bids > 0 AND started < "2001-12-20 00:00:00" AND ends > "2001-12-20 00:00:01" AND
+currently = (SELECT MAX(CURRENTLY) FROM Item WHERE num_bids > 0 AND started < "2001-12-20 00:00:00" AND ends > "2001-12-20 00:00:01");
 
 -- Find the number of sellers whose rating is higher than 1000
 SELECT COUNT(*)
@@ -31,13 +30,9 @@ SELECT COUNT(*)
 FROM Seller S, Bidder B
 WHERE S.sid = B.bid;
 
--- Find the number of categories that include at least one item with
--- a bid of more than $100
+-- Find the number of categories that include at least one item with a bid of more than $100
 SELECT COUNT(*)
-FROM ItemCategory
-WHERE iid IN (SELECT DISTINCT iid
-              FROM Bid
-              WHERE amount > 100)
-GROUP By category
-HAVING COUNT(*) >= 1
-
+FROM (SELECT COUNT(*)
+      FROM ItemCategory ic, Bid b
+      WHERE ic.iid = b.iid AND b.amount > 100
+      GROUP BY ic.category) as IC;

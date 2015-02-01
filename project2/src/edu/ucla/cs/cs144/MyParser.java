@@ -118,9 +118,8 @@ class ItemCategory {
     public String toString() {
         String output = "";
         for (String category : categories) {
-            output += itemId + "|*|" + category;
+            output += itemId + "|*|" + category + "\n";
         }
-        output = output.substring(0, output.length() - 1);
         return output;
     }
 }
@@ -174,7 +173,7 @@ class Bid {
     }
 
     public String toString() {
-        return itemId + "|*|" + bidderId + "|*|" + time + "|*|" + amount;
+        return itemId + "|*|" + bidderId + "|*|" + time + "|*|" + amount + "\n";
     }
 }
 
@@ -327,7 +326,6 @@ class MyParser {
             PrintWriter printer = new PrintWriter(writer);
             for (Object o : list) {
                 printer.print(o);
-                printer.println();
             }
             printer.close();
             writer.close();
