@@ -118,8 +118,9 @@ class ItemCategory {
     public String toString() {
         String output = "";
         for (String category : categories) {
-            output += itemId + "|*|" + category + "\n";
+            output += itemId + "|*|" + category;
         }
+        output = output.substring(0, output.length() - 1);
         return output;
     }
 }
@@ -185,6 +186,7 @@ class MyParser {
     //static Map<Long, ItemCategory> itemCategoryHT = new HashMap<Long, ItemCategory>();
     static Map<String, User> sellerHT = new HashMap<String, User>();
     static Map<String, Bidder> bidderHT = new HashMap<String, Bidder>();
+    static ArrayList<Bid> bidList = new ArrayList<Bid>();
     // static Map<String, Bid> bidHT = new HashMap<String, Bid>();
     static int maxDescriptionLength = 4000;
 
@@ -325,6 +327,7 @@ class MyParser {
             PrintWriter printer = new PrintWriter(writer);
             for (Object o : list) {
                 printer.print(o);
+                printer.println();
             }
             printer.close();
             writer.close();
@@ -381,7 +384,6 @@ class MyParser {
 
         Map<String, Item> itemHT = new HashMap<String, Item>();
         ArrayList<ItemCategory> categoryList = new ArrayList<ItemCategory>();
-        ArrayList<Bid> bidList = new ArrayList<Bid>();
 
         for (Element item : items) {
             String item_id = item.getAttribute("ItemID");
