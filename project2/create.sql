@@ -2,13 +2,13 @@ CREATE TABLE Seller (sid varchar(40) NOT NULL,
 				     rating int,
 				     PRIMARY KEY(sid)) ENGINE=INNODB;
 
-CREATE TABLE Bidder (bid bigint NOT NULL,
+CREATE TABLE Bidder (bid varchar(40) NOT NULL,
 					rating int,
 					location varchar(256),
 					country varchar(256),
 					PRIMARY KEY(bid)) ENGINE=INNODB;
 
-CREATE TABLE Item (iid bigint NOT NULL,
+CREATE TABLE Item (iid varchar(40) NOT NULL,
 				   name varchar(256),
 				   currently decimal(8,2),
 				   first_bid decimal(8,2),
@@ -25,12 +25,12 @@ CREATE TABLE Item (iid bigint NOT NULL,
 				   FOREIGN KEY (sid) REFERENCES Seller(sid),
 				   PRIMARY KEY(iid)) ENGINE=INNODB;
 
-CREATE TABLE ItemCategory (iid bigint NOT NULL,
-						  Category varchar(4000),
+CREATE TABLE ItemCategory (iid varchar(40) NOT NULL,
+						  category varchar(256),
 						  FOREIGN KEY (iid) REFERENCES Item(iid)) ENGINE=INNODB;
 
-CREATE TABLE Bid (iid bigint NOT NULL,
-				  bid int NOT NULL,
+CREATE TABLE Bid (iid varchar(40) NOT NULL,
+				  bid varchar(40) NOT NULL,
 				  time timestamp NOT NULL,
 				  amount decimal(8,2),
 				  FOREIGN KEY (iid) REFERENCES Item(iid),

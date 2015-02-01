@@ -44,7 +44,7 @@ import java.text.ParseException;
 import java.util.Date;
 
 class Item {
-    long itemId;
+    String itemId;
     String name;
     String currently;
     String first_bid;
@@ -59,7 +59,7 @@ class Item {
     String longitude;
     String latitude;
 
-    public Item(long id) {
+    public Item(String id) {
         this.itemId = id;
     }
 
@@ -103,10 +103,10 @@ class Item {
 }
 
 class ItemCategory {
-    long itemId;
+    String itemId;
     ArrayList<String> categories;
 
-    public ItemCategory(long iid) {
+    public ItemCategory(String iid) {
         this.itemId = iid;
         categories = new ArrayList<String>();
     }
@@ -183,7 +183,7 @@ class MyParser {
     static final String columnSeparator = "|*|";
     static DocumentBuilder builder;
 
-    static Map<Long, Item> itemHT = new HashMap<Long, Item>();
+    static Map<String, Item> itemHT = new HashMap<String, Item>();
     //static Map<Long, ItemCategory> itemCategoryHT = new HashMap<Long, ItemCategory>();
     static ArrayList<ItemCategory> categoryList = new ArrayList<ItemCategory>();
     static Map<String, User> sellerHT = new HashMap<String, User>();
@@ -306,12 +306,13 @@ class MyParser {
 
     /*  Writes the contents of a map to a tab-delimited file.
      */
-    static void writeMapToFile(String filename, HashMap<Object, Object> map) {
+    static void writeMapToFile(String filename, HashMap<String, Object> map) {
         try {
             FileWriter writer = new FileWriter(filename, true);
             PrintWriter printer = new PrintWriter(writer);
-            for (Object o : map.values()) {
-                printer.print(o);
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                Object curr = entry.getValue();
+                printer.print(curr);
                 printer.println();
             }
             printer.close();
@@ -385,7 +386,7 @@ class MyParser {
         Element[] items = getElementsByTagNameNR(root, "Item");
 
         for (Element item : items) {
-            long item_id = Integer.parseInt(item.getAttribute("ItemID"));
+            String item_id = item.getAttribute("ItemID");
 
             // Get all properties of current Item
             String name = getElementTextByTagNameNR(item, "Name");
@@ -399,7 +400,7 @@ class MyParser {
             if (description.length() > maxDescriptionLength)
                 description = description.substring(0, maxDescriptionLength - 1); // truncate string to 4000 chars
             description = description.replace("\"", "\\\"");
-            String userID = (getElementByTagNameNR(item, "Seller")).getAttribute("UserID");
+            String sellerID = (getElementByTagNameNR(item, "Seller")).getAttribute("UserID");
             String loc = getElementTextByTagNameNR(item, "Location");
             String item_country = getElementTextByTagNameNR(item, "Country");
 
@@ -412,7 +413,7 @@ class MyParser {
             newItem.setRequiredAttributes(name, currently, first_bid, num_bids, started, ends, description, loc, item_country);
             newItem.setLatitudeLongitude(latitude, longitude);
             newItem.setBuyPrice(buy_price);
-            newItem.setSellerID(userID);
+            newItem.setSellerID(sellerID);
 
             // Construct ItemCategory object for current Item
             Element[] categories = getElementsByTagNameNR(item, "Category");
@@ -423,7 +424,7 @@ class MyParser {
 
             // Construct the Seller
             int seller_rating = Integer.parseInt((getElementByTagNameNR(item, "Seller")).getAttribute("Rating"));
-            User seller = new User(userID);
+            User seller = new User(sellerID);
             seller.setRating(seller_rating);
 
             // Get all Bid children of Bids
@@ -446,7 +447,7 @@ class MyParser {
                 String time = formatDate(getElementTextByTagNameNR(bid, "Time"));
                 String amount = strip(getElementTextByTagNameNR(bid, "Amount"));
                 // String bid_id = Long.toString(item_id) + bidder_id + time;
-                newBid = new Bid(Long.toString(item_id), bidder_id, time, amount);
+                newBid = new Bid(item_id, bidder_id, time, amount);
 
                 bidderHT.put(bidder_id, newBidder);
                 bidList.add(newBid);
@@ -455,22 +456,22 @@ class MyParser {
             
             itemHT.put(item_id, newItem);
             categoryList.add(newItemCategory);
-            sellerHT.put(userID, seller);
+            sellerHT.put(sellerID, seller);
         }
 
-        HashMap<Object, Object> itemMap = new HashMap<Object, Object>(itemHT);
-        writeMapToFile("items.dat", itemMap);
+        HashMap<String, Object> itemMap = new HashMap<String, Object>(itemHT);
+        writeMapToFile("item.dat", itemMap);
         ArrayList<Object> itemCategoryList = new ArrayList<Object>(categoryList);
         writeListToFile("itemCategory.dat", itemCategoryList);
 //      HashMap<Object, Object> itemCategoryMap = new HashMap<Object, Object>(itemCategoryHT);
 //      writeMapToFile("itemCategory.dat", itemCategoryMap);
-        HashMap<Object, Object> bidderMap = new HashMap<Object, Object>(bidderHT);
+        HashMap<String, Object> bidderMap = new HashMap<String, Object>(bidderHT);
         writeMapToFile("bidder.dat", bidderMap);
         // HashMap<Object, Object> bidMap = new HashMap<Object, Object>(bidHT);
         // writeMapToFile("bid.dat", bidMap);
         ArrayList<Object> bidListOutput = new ArrayList<Object>(bidList);
         writeListToFile("bid.dat", bidListOutput);
-        HashMap<Object, Object> sellerMap = new HashMap<Object, Object>(sellerHT);
+        HashMap<String, Object> sellerMap = new HashMap<String, Object>(sellerHT);
         writeMapToFile("seller.dat", sellerMap);
 
         /**************************************************************/
