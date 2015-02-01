@@ -95,20 +95,20 @@ class Item {
         String longitudeStr = (longitude != null) ? longitude : "\\N";
         String latitudeStr = (latitude != null) ? latitude : "\\N";
 
-        return itemId + "\t" + name + "\t" + currently + "\t" + first_bid + "\t" +
-                buyStr + "\t" + num_bids + "\t" + started + "\t" + ends + "\t" +
-                description + "\t" + sellerID + "\t" + location + "\t" + country + "\t"
-                + latitudeStr + "\t" + longitudeStr;
+        return itemId + "|*|" + name + "|*|" + currently + "|*|" + first_bid + "|*|" +
+                buyStr + "|*|" + num_bids + "|*|" + started + "|*|" + ends + "|*|" +
+                description + "|*|" + sellerID + "|*|" + location + "|*|" + country + "|*|"
+                + latitudeStr + "|*|" + longitudeStr;
     }
 }
 
 class ItemCategory {
     String itemId;
-    ArrayList<String> categories;
+    Set<String> categories;
 
     public ItemCategory(String iid) {
         this.itemId = iid;
-        categories = new ArrayList<String>();
+        categories = new HashSet<String>();
     }
 
     public void addCategory(String category) {
@@ -118,9 +118,8 @@ class ItemCategory {
     public String toString() {
         String output = "";
         for (String category : categories) {
-            output += itemId + "\t" + category + "\n";
+            output += itemId + "|*|" + category + "\n";
         }
-        output = output.substring(0, output.length() - 1);      // remove last new line
         return output;
     }
 }
@@ -138,7 +137,7 @@ class User {
     }
 
     public String toString() {
-        return userId + "\t" + rating;
+        return userId + "|*|" + rating;
     }
 }
 
@@ -156,7 +155,7 @@ class Bidder extends User {
     }
 
     public String toString() {
-        return super.toString() + "\t" + location + "\t" + country;
+        return super.toString() + "|*|" + location + "|*|" + country;
     }
 }
 
@@ -174,22 +173,19 @@ class Bid {
     }
 
     public String toString() {
-        return itemId + "\t" + bidderId + "\t" + time + "\t" + amount;
+        return itemId + "|*|" + bidderId + "|*|" + time + "|*|" + amount;
     }
 }
 
 class MyParser {
-    
+
     static final String columnSeparator = "|*|";
     static DocumentBuilder builder;
 
-    static Map<String, Item> itemHT = new HashMap<String, Item>();
     //static Map<Long, ItemCategory> itemCategoryHT = new HashMap<Long, ItemCategory>();
-    static ArrayList<ItemCategory> categoryList = new ArrayList<ItemCategory>();
     static Map<String, User> sellerHT = new HashMap<String, User>();
     static Map<String, Bidder> bidderHT = new HashMap<String, Bidder>();
     // static Map<String, Bid> bidHT = new HashMap<String, Bid>();
-    static ArrayList<Bid> bidList = new ArrayList<Bid>();
     static int maxDescriptionLength = 4000;
 
     static final String[] typeName = {
@@ -329,7 +325,6 @@ class MyParser {
             PrintWriter printer = new PrintWriter(writer);
             for (Object o : list) {
                 printer.print(o);
-                printer.println();
             }
             printer.close();
             writer.close();
@@ -383,6 +378,10 @@ class MyParser {
 
         // Get all Item children of Items
         Element[] items = getElementsByTagNameNR(root, "Item");
+
+        Map<String, Item> itemHT = new HashMap<String, Item>();
+        ArrayList<ItemCategory> categoryList = new ArrayList<ItemCategory>();
+        ArrayList<Bid> bidList = new ArrayList<Bid>();
 
         for (Element item : items) {
             String item_id = item.getAttribute("ItemID");
