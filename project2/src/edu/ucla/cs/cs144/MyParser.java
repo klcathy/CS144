@@ -97,8 +97,8 @@ class Item {
 
         return itemId + "\t" + name + "\t" + currently + "\t" + first_bid + "\t" +
                 buyStr + "\t" + num_bids + "\t" + started + "\t" + ends + "\t" +
-                description + "\t" + location + "\t" + latitudeStr + "\t" +
-                longitudeStr + "\t" + country;
+                description + "\t" + sellerID + "\t" + location + "\t" + country + "\t"
+                + latitudeStr + "\t" + longitudeStr;
     }
 }
 
@@ -311,14 +311,13 @@ class MyParser {
             FileWriter writer = new FileWriter(filename, true);
             PrintWriter printer = new PrintWriter(writer);
             for (Map.Entry<String, Object> entry : map.entrySet()) {
-                Object curr = entry.getValue();
-                printer.print(curr);
+                printer.print(entry.getValue());
                 printer.println();
             }
             printer.close();
             writer.close();
         } catch (IOException e) {
-            System.out.println("Error printing tab-delimited file!");
+            System.out.println("Error writing to tab-delimited file!");
         }
     }
 
@@ -335,7 +334,7 @@ class MyParser {
             printer.close();
             writer.close();
         } catch (IOException e) {
-            System.out.println("Error printing tab-delimited file!");
+            System.out.println("Error writing to tab-delimited file!");
         }
     }
 
