@@ -34,7 +34,6 @@ import edu.ucla.cs.cs144.SearchRegion;
 import edu.ucla.cs.cs144.SearchResult;
 
 public class AuctionSearch implements IAuctionSearch {
-
 	/* 
          * You will probably have to use JDBC to access MySQL data
          * Lucene IndexSearcher class to lookup Lucene index.
@@ -49,11 +48,60 @@ public class AuctionSearch implements IAuctionSearch {
          * placed at src/edu/ucla/cs/cs144.
          *
          */
+
+    private IndexSearcher searcher = null;
+    private QueryParser parser = null;
+
+    public AuctionSearch() {
+        try {
+            searcher = new IndexSearcher(DirectoryReader.open(FSDirectory.open(new File("/var/lib/lucene/index1"))));
+            parser = new QueryParser("content", new StandardAnalyzer());
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+
+    public TopDocs performSearch(String queryString, int n) throws IOException, ParseException {
+        Query query = parser.parse(queryString);
+        return searcher.search(query, n);
+    }
+
+    public Document getDocument(int docId) throws IOException {
+        return searcher.doc(docId);
+    }
 	
 	public SearchResult[] basicSearch(String query, int numResultsToSkip, 
 			int numResultsToReturn) {
-		// TODO: Your code here!
-		return new SearchResult[0];
+
+		SearchResult[] searchResults = null;
+
+        try {
+
+            // Retrieve all matching documents
+            TopDocs topDocs = performSearch(query, numResultsToSkip + numResultsToReturn);
+
+            // Obtain the scoreDoc (documentId, relevanceScore) array from topDocs
+            ScoreDoc[] hits = topDocs.scoreDocs;
+
+            int start = numResultsToSkip;
+            int end = hits.length;
+
+            searchResults = new SearchResult[end - start];
+
+            for (int i = start, j = 0; i < end; i++, j++) {
+                Document doc = getDocument(hits[i].doc);
+                String itemId = doc.get("iid");
+                String name = doc.get("name");
+
+                searchResults[j] = new SearchResult(itemId, name);
+            }
+        } catch (ParseException e) {
+            System.out.println(e);
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+		return searchResults;
 	}
 
 	public SearchResult[] spatialSearch(String query, SearchRegion region,
