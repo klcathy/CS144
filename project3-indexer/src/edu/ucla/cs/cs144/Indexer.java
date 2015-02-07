@@ -103,7 +103,9 @@ public class Indexer {
                 String fullSearchableText = name + " " + description + " " + categories;
 
                 doc.add(new StringField("iid", itemId, Field.Store.YES));
-                doc.add(new StringField("name", name, Field.Store.YES));
+                doc.add(new TextField("name", name, Field.Store.YES));
+                doc.add(new TextField("description", description, Field.Store.NO));
+                doc.add(new TextField("category", categories, Field.Store.NO));
                 doc.add(new TextField("content", fullSearchableText, Field.Store.NO));
                 writer.addDocument(doc);
             }
