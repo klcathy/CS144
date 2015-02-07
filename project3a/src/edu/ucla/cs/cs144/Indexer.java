@@ -66,54 +66,68 @@ public class Indexer {
             System.out.println(ex);
         }
 
-        Statement itemStmt = conn.createStatement();        // Item table
-        Statement categoryStmt = conn.createStatement();    // Category table
+        try {
+            Statement itemStmt = conn.createStatement();        // Item table
+            Statement categoryStmt = conn.createStatement();    // Category table
 
-        ResultSet itemRS = itemStmt.executeQuery("SELECT iid, name, description FROM Item");
-        ResultSet categoryRS = categoryStmt.executeQuery("SELECT * FROM ItemCategory");
+            ResultSet itemRS = itemStmt.executeQuery("SELECT iid, name, description FROM Item");
+            ResultSet categoryRS = categoryStmt.executeQuery("SELECT * FROM ItemCategory");
 
-        // Stores item -> category relations
-        HashMap<String, String> itemCategoryMap = new HashMap<String, String>();
+            // Stores item -> category relations
+            HashMap<String, String> itemCategoryMap = new HashMap<String, String>();
 
-        // Concatenate all categories of an item into one string
-        while (categoryRS.next()) {
-            String itemId = categoryRS.getString("iid");
-            String currentCategory = categoryRS.getString("category");
+            // Concatenate all categories of an item into one string
+            while (categoryRS.next()) {
+                String itemId = categoryRS.getString("iid");
+                String currentCategory = categoryRS.getString("category");
 
-            if (itemCategoryMap.containsKey(itemId)) {
-                itemCategoryMap.put(itemId, itemCategoryMap.get(itemId) + " " + currentCategory);
-            } else {
-                itemCategoryMap.put(itemId, currentCategory);
+                if (itemCategoryMap.containsKey(itemId)) {
+                    itemCategoryMap.put(itemId, itemCategoryMap.get(itemId) + " " + currentCategory);
+                } else {
+                    itemCategoryMap.put(itemId, currentCategory);
+                }
             }
+
+            // Index items with correspodning categories
+            while (itemRS.next()) {
+                IndexWriter writer = getIndexWriter();
+                Document doc = new Document();
+
+                // Individual keyword search
+                String itemId = itemRS.getString("iid");
+                String name = itemRS.getString("name");
+                String description = itemRS.getString("description");
+                String categories = itemCategoryMap.get(itemId);
+
+                // Basic keyword search
+                String fullSearchableText = name + " " + description + " " + categories;
+
+                doc.add(new StringField("iid", itemId, Field.Store.YES));
+                doc.add(new StringField("name", name, Field.Store.YES));
+                doc.add(new TextField("content", fullSearchableText, Field.Store.NO));
+                writer.addDocument(doc);
+            }
+
+            // Do I need all these closes?
+            itemRS.close();
+            categoryRS.close();
+            itemStmt.close();
+            categoryStmt.close();
+
+            closeIndexWriter();
+        } catch (SQLException e) {
+            System.out.println("Caught SQLException");
+            System.out.println("--------------------");
+            while (e != null) {
+                System.out.println("Message: " + e.getMessage());
+                System.out.println("SQLState: " + e.getSQLState());
+                System.out.println("Error: " + e.getErrorCode());
+                System.out.println("--------------------");
+                e = e.getNextException();
+            }
+        } catch (IOException e) {
+            System.out.println(e);
         }
-
-        // Index items with correspodning categories
-        while (itemRS.next()) {
-            IndexWriter writer = getIndexWriter();
-            Document doc = new Document();
-
-            // Individual keyword search
-            String itemId = itemRS.getString("iid");
-            String name = itemRS.getString("name");
-            String description = itemRS.getString("description");
-            String categories = itemCategoryMap.get(itemId);
-
-            // Basic keyword search
-            String fullSearchableText = name + " " + description + " " + categories;
-
-            doc.add(new StringField("iid", itemId, Field.Store.YES));
-            doc.add(new StringField("name", name, Field.Store.YES));
-            doc.add(new TextField("content", fullSearchableText, Field.Store.NO));
-            writer.addDocument(doc);
-        }
-
-        // Do I need all these closes?
-        itemRS.close();
-        categoryRS.close();
-        itemStmt.close();
-        categoryStmt.close();
-
-        closeIndexWriter();
 
 
         /*
