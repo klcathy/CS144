@@ -396,7 +396,7 @@ class MyParser {
             String ends = formatDate(getElementTextByTagNameNR(item, "Ends"));
             String description = getElementTextByTagNameNR(item, "Description");
             if (description.length() > maxDescriptionLength)
-                description = description.substring(0, maxDescriptionLength - 1); // truncate string to 4000 chars
+                description = description.substring(0, maxDescriptionLength); // truncate string to 4000 chars
             description = description.replace("\"", "\\\"");
             String sellerID = (getElementByTagNameNR(item, "Seller")).getAttribute("UserID");
             String loc = getElementTextByTagNameNR(item, "Location");

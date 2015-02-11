@@ -83,17 +83,18 @@ public class AuctionSearch implements IAuctionSearch {
             // Obtain the scoreDoc (documentId, relevanceScore) array from topDocs
             ScoreDoc[] hits = topDocs.scoreDocs;
 
-            int start = numResultsToSkip;
-            int end = hits.length;
+            // Determine how many results to return
+            if (topDocs.totalHits < (numResultsToSkip + numResultsToReturn))
+                numResultsToReturn = Math.max(0, topDocs.totalHits - numResultsToSkip);
 
-            searchResults = new SearchResult[end - start];
+            searchResults = new SearchResult[numResultsToReturn];
 
-            for (int i = start, j = 0; i < end; i++, j++) {
-                Document doc = getDocument(hits[i].doc);
+            for (int i = 0; i < numResultsToReturn; i++) {
+                Document doc = getDocument(hits[i + numResultsToSkip].doc);
                 String itemId = doc.get("iid");
                 String name = doc.get("name");
 
-                searchResults[j] = new SearchResult(itemId, name);
+                searchResults[i] = new SearchResult(itemId, name);
             }
         } catch (ParseException e) {
             System.out.println(e);
