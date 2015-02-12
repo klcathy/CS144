@@ -23,7 +23,7 @@ public class AuctionSearchTest {
 		for(SearchResult result : basicResults) {
 			System.out.println(result.getItemId() + ": " + result.getName());
 		}
-		
+
 		SearchRegion region =
 		    new SearchRegion(33.774, -118.63, 34.201, -117.38); 
 		SearchResult[] spatialResults = as.spatialSearch("camera", region, 0, 20);
@@ -49,8 +49,13 @@ public class AuctionSearchTest {
         System.out.println("Received " + sampleResult2.length + " results");
 
         String query3 = "star trek";
-        SearchResult[] sampleResult3 = as.basicSearch(query, 0, 780);
+        SearchResult[] sampleResult3 = as.basicSearch(query3, 0, 780);
         System.out.println("Basic Search Query: " + query3);
         System.out.println("Received " + sampleResult3.length + " results");
+
+        String query4 = "camera";
+        SearchResult[] sampleResult4 = as.basicSearch(query4, 0, 1000);
+        System.out.println("Basic Search Query: " + query4);
+        System.out.println("Received " + sampleResult4.length + " results");
 	}
 }

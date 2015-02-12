@@ -60,7 +60,7 @@ public class Indexer {
         // APPEND mode
         IndexWriter writer = getIndexWriter(false);
 
-        String fullSearchableText = itemId + " " +  name + " " + description + " " + categories;
+        String fullSearchableText = name + " " + description + " " + categories;
 
         Document doc = new Document();
 

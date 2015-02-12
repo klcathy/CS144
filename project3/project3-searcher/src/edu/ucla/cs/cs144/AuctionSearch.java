@@ -3,16 +3,12 @@ package edu.ucla.cs.cs144;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.File;
+import java.sql.*;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.List;
 import java.text.SimpleDateFormat;
-
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.analysis.Analyzer;
@@ -105,10 +101,80 @@ public class AuctionSearch implements IAuctionSearch {
 		return searchResults;
 	}
 
+    public String getPolygon(SearchRegion region) {
+        double lx = region.getLx();
+        double ly = region.getLy();
+        double rx = region.getRx();
+        double ry = region.getRy();
+
+        String lowerLeft = "Point(" + lx + "," + ly + ")";
+        String upperRight = "Point(" + rx + "," + ry + ")";
+
+        return "LineString(" + lowerLeft + ", " + upperRight + ")";
+    }
+
 	public SearchResult[] spatialSearch(String query, SearchRegion region,
 			int numResultsToSkip, int numResultsToReturn) {
-		// TODO: Your code here!
-		return new SearchResult[0];
+
+        SearchResult[] searchResults = null;
+        ArrayList<SearchResult> intermediateResults = new ArrayList<SearchResult>();
+        Connection conn = null;
+        int start = 0, added = 0, skipped = 0;
+
+        try {
+            conn = DbManager.getConnection(true);
+
+            searchResults = basicSearch(query, start, numResultsToReturn);
+
+            String polygon = getPolygon(region);
+
+            PreparedStatement spatialCheckItem = conn.prepareStatement(
+                "SELECT MBRContains(" + polygon + ", location) AS SpatialContains FROM ItemLocation WHERE iid = ?"
+            );
+
+            while (added < numResultsToReturn && searchResults.length > 0) {
+                for (int i = 0; i < searchResults.length; i++) {
+                    // Check if item is spatially contained in region
+                    String itemId = searchResults[i].getItemId();
+                    spatialCheckItem.setString(1, itemId);
+                    ResultSet containsRS = spatialCheckItem.executeQuery();
+
+                    if (containsRS.next() && containsRS.getBoolean("SpatialContains")) {
+                        // Enough results have been found
+                        if (added >= numResultsToReturn)
+                            break;
+                        // Still skipping results
+                        if (skipped < numResultsToSkip) {
+                            skipped++;
+                        }
+                        // Add to results
+                        else {
+                            intermediateResults.add(searchResults[i]);
+                            added++;
+                        }
+                    }
+                    containsRS.close();
+                }
+
+                // Look up next starting point for basicSearch
+                start += numResultsToReturn;
+                searchResults = basicSearch(query, start, numResultsToReturn);
+            }
+
+            spatialCheckItem.close();
+            conn.close();
+
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+
+        // Convert ArrayList to array
+        SearchResult[] finalResults = new SearchResult[added];
+        for (int i = 0; i < added; i++) {
+            finalResults[i] = intermediateResults.get(i);
+        }
+
+		return finalResults;
 	}
 
 	public String getXMLDataForItemId(String itemId) {
