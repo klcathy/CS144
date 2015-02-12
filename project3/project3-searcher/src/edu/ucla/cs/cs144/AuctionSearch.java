@@ -101,7 +101,7 @@ public class AuctionSearch implements IAuctionSearch {
 		return searchResults;
 	}
 
-    public String getPolygon(SearchRegion region) {
+    public String getLine(SearchRegion region) {
         double lx = region.getLx();
         double ly = region.getLy();
         double rx = region.getRx();
@@ -126,10 +126,10 @@ public class AuctionSearch implements IAuctionSearch {
 
             searchResults = basicSearch(query, start, numResultsToReturn);
 
-            String polygon = getPolygon(region);
+            String line = getLine(region);
 
             PreparedStatement spatialCheckItem = conn.prepareStatement(
-                "SELECT MBRContains(" + polygon + ", location) AS SpatialContains FROM ItemLocation WHERE iid = ?"
+                "SELECT MBRContains(" + line + ", location) AS SpatialContains FROM ItemLocation WHERE iid = ?"
             );
 
             while (added < numResultsToReturn && searchResults.length > 0) {
