@@ -4,11 +4,15 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.File;
 import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.List;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+
 
 import org.apache.lucene.document.Document;
 import org.apache.lucene.analysis.Analyzer;
@@ -28,6 +32,8 @@ import org.apache.lucene.util.Version;
 import edu.ucla.cs.cs144.DbManager;
 import edu.ucla.cs.cs144.SearchRegion;
 import edu.ucla.cs.cs144.SearchResult;
+
+import javax.xml.transform.Result;
 
 public class AuctionSearch implements IAuctionSearch {
 	/* 
@@ -177,9 +183,153 @@ public class AuctionSearch implements IAuctionSearch {
 		return finalResults;
 	}
 
+    public String getXMLTag(String tag, String content) {
+        String combined = "";
+
+        combined = "<" + tag + ">" + content + "</" + tag + ">" + "\n";
+
+        return combined;
+    }
+
+    static String formatDate(String str) {
+        SimpleDateFormat parseFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat outputFormat = new SimpleDateFormat("MMM-dd-yy HH:mm:ss");
+        String outputDate = "";
+        try {
+            Date parsed = parseFormat.parse(str);
+            outputDate = outputFormat.format(parsed);
+        }
+        catch (Exception pe) {
+            System.out.println("ERROR: Cannot parse \"" + str + "\"");
+        }
+        return outputDate;
+    }
+
 	public String getXMLDataForItemId(String itemId) {
-		// TODO: Your code here!
-		return "";
+        Connection conn = null;
+        String data = "";
+
+        try {
+            conn = DbManager.getConnection(true);
+
+            Statement itemStmt = conn.createStatement();
+            ResultSet itemRS = itemStmt.executeQuery("SELECT * FROM Item WHERE iid = " + itemId);
+
+            if (itemRS.next()) {
+                // Item
+                data += "<Item ItemID='";
+                data = data + itemId + "'>" + "\n";
+
+                // Name
+                String name = itemRS.getString("name");
+                data += getXMLTag("Name", name);
+
+                // Category
+                Statement itemCatStmt = conn.createStatement();
+                ResultSet itemCatRS = itemCatStmt.executeQuery("SELECT * FROM ItemCategory WHERE iid = " + itemId);
+                while (itemCatRS.next()) {
+                    String category = itemCatRS.getString("category");
+                    data += getXMLTag("Category", category);
+                }
+
+                // Currently
+                String currently = itemRS.getString("currently");
+                data += getXMLTag("Currently", "$"+currently);
+
+                // First Bid
+                String first_bid = itemRS.getString("first_bid");
+                data += getXMLTag("First_Bid", "$"+first_bid);
+
+                // Number of Bids
+                String num_bids = itemRS.getString("num_bids");
+                data += getXMLTag("Number_of_Bids", num_bids);
+
+                // Bids
+                Statement bidStmt = conn.createStatement();
+                ResultSet bidRS = bidStmt.executeQuery("SELECT * FROM Bid WHERE iid = " + itemId);
+                data += "<Bids>\n";
+                while (bidRS.next()) {
+                    data += "<Bid>\n";
+                    String bidder_id = bidRS.getString("bid");
+                    String time = formatDate(bidRS.getString("time"));
+                    String amount = bidRS.getString("amount");
+
+                    Statement bidderStmt = conn.createStatement();
+                    ResultSet bidderRS = bidderStmt.executeQuery("SELECT * FROM Bidder WHERE bid = '" + bidder_id + "'");
+                    if (bidderRS.next()) {
+                        String rating = bidderRS.getString("rating");
+                        String location = bidderRS.getString("location");
+                        String country = bidderRS.getString("country");
+
+                        data = data + "<Bidder Rating='" + rating + "' UserID='" + bidder_id + "'>\n";
+                        data += getXMLTag("Location", location);
+                        data += getXMLTag("Country", country);
+                        data += "</Bidder>\n";
+                    }
+                    bidderStmt.close();
+                    bidderRS.close();
+
+                    data += getXMLTag("Time", time);
+                    data += getXMLTag("Amount", "$"+amount);
+                    data += "</Bid>\n";
+                }
+                data += "</Bids>\n";
+
+                // Location
+                String location = itemRS.getString("location");
+                String latitude = itemRS.getString("latitude");
+                String longitude = itemRS.getString("longitude");
+                if (latitude.equals(""))
+                    data += getXMLTag("Location", location);
+                else {
+                    data = data + "<Location Latitude='" + latitude + "' Longitude ='" + longitude +
+                            "'>" + location + "</Location>" + "\n";
+                }
+
+                // Country
+                String country = itemRS.getString("country");
+                data += getXMLTag("Country", country);
+
+                // Started
+                String started = formatDate(itemRS.getString("started"));
+                data += getXMLTag("Started", started);
+
+                // Ends
+                String ends = formatDate(itemRS.getString("ends"));
+                data += getXMLTag("Ends", ends);
+
+                // Seller
+                String seller = itemRS.getString("sid");
+                Statement sellerStmt = conn.createStatement();
+                ResultSet sellerRS = sellerStmt.executeQuery("SELECT * FROM Seller WHERE sid = '" + seller + "'");
+                if (sellerRS.next()) {
+                    String rating = sellerRS.getString("rating");
+                    data = data + "<Seller Rating='" + rating + "' UserID='" + seller + "' />" + "\n";
+                }
+
+                // Description
+                String description = itemRS.getString("description");
+                data += getXMLTag("Description", description);
+
+                itemCatRS.close();
+                itemCatStmt.close();
+                sellerRS.close();
+                sellerStmt.close();
+            }
+
+            // Do I need all these closes?
+            itemRS.close();
+            itemStmt.close();
+            conn.close();
+
+
+        } catch (SQLException e) {
+            System.out.println(e);
+            System.out.println("Message: " + e.getMessage());
+
+        }
+
+		return data;
 	}
 	
 	public String echo(String message) {

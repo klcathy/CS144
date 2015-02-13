@@ -32,6 +32,10 @@ public class AuctionSearchTest {
 		for(SearchResult result : spatialResults) {
 			System.out.println(result.getItemId() + ": " + result.getName());
 		}
+
+		spatialResults = as.spatialSearch(query, region, 0, 200);
+		System.out.println("Spatial Search: " + query);
+		System.out.println("Received " + spatialResults.length + " results");
 		
 		String itemId = "1497595357";
 		String item = as.getXMLDataForItemId(itemId);
@@ -57,5 +61,16 @@ public class AuctionSearchTest {
         SearchResult[] sampleResult4 = as.basicSearch(query4, 0, 1000);
         System.out.println("Basic Search Query: " + query4);
         System.out.println("Received " + sampleResult4.length + " results");
+
+		String itemId2 = "1043374545";
+		String item2 = as.getXMLDataForItemId(itemId2);
+		System.out.println("XML data for ItemId: " + itemId2);
+		System.out.println(item2);
+
+		String itemId3 = "1043495702";
+		String item3 = as.getXMLDataForItemId(itemId3);
+		System.out.println("XML data for ItemId: " + itemId3);
+		System.out.println(item3);
+
 	}
 }
