@@ -43,34 +43,34 @@ public class AuctionSearchTest {
 		System.out.println(item);
 
 		// Add your own test here
-        SearchResult[] sampleResult1 = as.basicSearch(query, 0, 70);
+        basicResults = as.basicSearch(query, 0, 70);
         System.out.println("Basic Search Query: " + query);
-        System.out.println("Received " + sampleResult1.length + " results");
+        System.out.println("Received " + basicResults.length + " results");
 
-        String query2 = "kitchenware";
-        SearchResult[] sampleResult2 = as.basicSearch(query2, 0, 1470);
-        System.out.println("Basic Search Query: " + query2);
-        System.out.println("Received " + sampleResult2.length + " results");
+        query = "kitchenware";
+        basicResults = as.basicSearch(query, 0, 1470);
+        System.out.println("Basic Search Query: " + query);
+        System.out.println("Received " + basicResults.length + " results");
 
-        String query3 = "star trek";
-        SearchResult[] sampleResult3 = as.basicSearch(query3, 0, 780);
-        System.out.println("Basic Search Query: " + query3);
-        System.out.println("Received " + sampleResult3.length + " results");
+        query = "star trek";
+        basicResults = as.basicSearch(query, 0, 780);
+        System.out.println("Basic Search Query: " + query);
+        System.out.println("Received " + basicResults.length + " results");
 
-        String query4 = "camera";
-        SearchResult[] sampleResult4 = as.basicSearch(query4, 0, 1000);
-        System.out.println("Basic Search Query: " + query4);
-        System.out.println("Received " + sampleResult4.length + " results");
+        query = "camera";
+        basicResults = as.basicSearch(query, 0, 1000);
+        System.out.println("Basic Search Query: " + query);
+        System.out.println("Received " + basicResults.length + " results");
 
-		String itemId2 = "1043374545";
-		String item2 = as.getXMLDataForItemId(itemId2);
-		System.out.println("XML data for ItemId: " + itemId2);
-		System.out.println(item2);
+		itemId = "1043374545";
+		item = as.getXMLDataForItemId(itemId);
+		System.out.println("XML data for ItemId: " + itemId);
+		System.out.println(item);
 
-		String itemId3 = "1043495702";
-		String item3 = as.getXMLDataForItemId(itemId3);
-		System.out.println("XML data for ItemId: " + itemId3);
-		System.out.println(item3);
+		itemId = "1043495702";
+		item = as.getXMLDataForItemId(itemId);
+		System.out.println("XML data for ItemId: " + itemId);
+		System.out.println(item);
 
 	}
 }

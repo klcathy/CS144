@@ -98,13 +98,16 @@ public class AuctionSearch implements IAuctionSearch {
 
                 searchResults[i] = new SearchResult(itemId, name);
             }
+
+            return searchResults;
+
         } catch (ParseException e) {
             System.out.println(e);
         } catch (IOException e) {
             System.out.println(e);
         }
 
-		return searchResults;
+		return new SearchResult[0];
 	}
 
     public String getLine(SearchRegion region) {
@@ -205,6 +208,15 @@ public class AuctionSearch implements IAuctionSearch {
         return outputDate;
     }
 
+    public String escapeString(String str) {
+        if (str == null || str.isEmpty())
+            return str;
+
+        String output = str.replaceAll("&", "&amp;").replaceAll("\"", "&quot;").replaceAll("'", "&apos;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+
+        return output;
+    }
+
 	public String getXMLDataForItemId(String itemId) {
         Connection conn = null;
         String data = "";
@@ -221,27 +233,27 @@ public class AuctionSearch implements IAuctionSearch {
                 data = data + itemId + "'>" + "\n";
 
                 // Name
-                String name = itemRS.getString("name");
+                String name = escapeString(itemRS.getString("name"));
                 data += getXMLTag("Name", name);
 
                 // Category
                 Statement itemCatStmt = conn.createStatement();
                 ResultSet itemCatRS = itemCatStmt.executeQuery("SELECT * FROM ItemCategory WHERE iid = " + itemId);
                 while (itemCatRS.next()) {
-                    String category = itemCatRS.getString("category");
+                    String category = escapeString(itemCatRS.getString("category"));
                     data += getXMLTag("Category", category);
                 }
 
                 // Currently
-                String currently = itemRS.getString("currently");
+                String currently = escapeString(itemRS.getString("currently"));
                 data += getXMLTag("Currently", "$"+currently);
 
                 // First Bid
-                String first_bid = itemRS.getString("first_bid");
+                String first_bid = escapeString(itemRS.getString("first_bid"));
                 data += getXMLTag("First_Bid", "$"+first_bid);
 
                 // Number of Bids
-                String num_bids = itemRS.getString("num_bids");
+                String num_bids = escapeString(itemRS.getString("num_bids"));
                 data += getXMLTag("Number_of_Bids", num_bids);
 
                 // Bids
@@ -250,16 +262,16 @@ public class AuctionSearch implements IAuctionSearch {
                 data += "<Bids>\n";
                 while (bidRS.next()) {
                     data += "<Bid>\n";
-                    String bidder_id = bidRS.getString("bid");
-                    String time = formatDate(bidRS.getString("time"));
-                    String amount = bidRS.getString("amount");
+                    String bidder_id = escapeString(bidRS.getString("bid"));
+                    String time = escapeString(formatDate(bidRS.getString("time")));
+                    String amount = escapeString(bidRS.getString("amount"));
 
                     Statement bidderStmt = conn.createStatement();
                     ResultSet bidderRS = bidderStmt.executeQuery("SELECT * FROM Bidder WHERE bid = '" + bidder_id + "'");
                     if (bidderRS.next()) {
-                        String rating = bidderRS.getString("rating");
-                        String location = bidderRS.getString("location");
-                        String country = bidderRS.getString("country");
+                        String rating = escapeString(bidderRS.getString("rating"));
+                        String location = escapeString(bidderRS.getString("location"));
+                        String country = escapeString(bidderRS.getString("country"));
 
                         data = data + "<Bidder Rating='" + rating + "' UserID='" + bidder_id + "'>\n";
                         data += getXMLTag("Location", location);
@@ -276,9 +288,9 @@ public class AuctionSearch implements IAuctionSearch {
                 data += "</Bids>\n";
 
                 // Location
-                String location = itemRS.getString("location");
-                String latitude = itemRS.getString("latitude");
-                String longitude = itemRS.getString("longitude");
+                String location = escapeString(itemRS.getString("location"));
+                String latitude = escapeString(itemRS.getString("latitude"));
+                String longitude = escapeString(itemRS.getString("longitude"));
                 if (latitude.equals(""))
                     data += getXMLTag("Location", location);
                 else {
@@ -287,28 +299,28 @@ public class AuctionSearch implements IAuctionSearch {
                 }
 
                 // Country
-                String country = itemRS.getString("country");
+                String country = escapeString(itemRS.getString("country"));
                 data += getXMLTag("Country", country);
 
                 // Started
-                String started = formatDate(itemRS.getString("started"));
+                String started = escapeString(formatDate(itemRS.getString("started")));
                 data += getXMLTag("Started", started);
 
                 // Ends
-                String ends = formatDate(itemRS.getString("ends"));
+                String ends = escapeString(formatDate(itemRS.getString("ends")));
                 data += getXMLTag("Ends", ends);
 
                 // Seller
-                String seller = itemRS.getString("sid");
+                String seller = escapeString(itemRS.getString("sid"));
                 Statement sellerStmt = conn.createStatement();
                 ResultSet sellerRS = sellerStmt.executeQuery("SELECT * FROM Seller WHERE sid = '" + seller + "'");
                 if (sellerRS.next()) {
-                    String rating = sellerRS.getString("rating");
+                    String rating = escapeString(sellerRS.getString("rating"));
                     data = data + "<Seller Rating='" + rating + "' UserID='" + seller + "' />" + "\n";
                 }
 
                 // Description
-                String description = itemRS.getString("description");
+                String description = escapeString(itemRS.getString("description"));
                 data += getXMLTag("Description", description);
 
                 itemCatRS.close();
