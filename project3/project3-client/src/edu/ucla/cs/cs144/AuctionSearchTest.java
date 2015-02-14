@@ -38,5 +38,38 @@ public class AuctionSearchTest {
 		System.out.println(item);
 
 		// Add your own test here
+		basicResults = AuctionSearchClient.basicSearch(query, 0, 70);
+        System.out.println("Basic Search Query: " + query);
+        System.out.println("Received " + basicResults.length + " results");
+
+        query = "kitchenware";
+        basicResults = AuctionSearchClient.basicSearch(query, 0, 1470);
+        System.out.println("Basic Search Query: " + query);
+        System.out.println("Received " + basicResults.length + " results");
+
+        query = "star trek";
+        basicResults = AuctionSearchClient.basicSearch(query, 0, 780);
+        System.out.println("Basic Search Query: " + query);
+        System.out.println("Received " + basicResults.length + " results");
+
+        query = "camera";
+        basicResults = AuctionSearchClient.basicSearch(query, 0, 1000);
+        System.out.println("Basic Search Query: " + query);
+        System.out.println("Received " + basicResults.length + " results");
+
+		itemId = "1043374545";
+		item = AuctionSearchClient.getXMLDataForItemId(itemId);
+		System.out.println("XML data for ItemId: " + itemId);
+		System.out.println(item);
+
+		itemId = "1043495702";
+		item = AuctionSearchClient.getXMLDataForItemId(itemId);
+		System.out.println("XML data for ItemId: " + itemId);
+		System.out.println(item);
+
+		itemId = "1043650580";
+		item = AuctionSearchClient.getXMLDataForItemId(itemId);
+		System.out.println("XML data for ItemId: " + itemId);
+		System.out.println(item);
 	}
 }
