@@ -17,6 +17,7 @@ public class SearchServlet extends HttpServlet implements Servlet {
         int numResultsToSkip = 0;
         int numResultsToReturn = 10;
 
+        // Get parameters
         if (request.getParameter("q") != null) {
             query = request.getParameter("q");
         }
@@ -27,8 +28,19 @@ public class SearchServlet extends HttpServlet implements Servlet {
             numResultsToReturn = Integer.parseInt(request.getParameter("numResultsToReturn"));
         }
 
+        // No negative int parameters allowed
+        if (numResultsToSkip < 0)
+            numResultsToSkip = 0;
+        if (numResultsToReturn < 0)
+            numResultsToReturn = 10;
+
         SearchResult[] results = AuctionSearchClient.basicSearch(query, numResultsToSkip, numResultsToReturn);
+
+        // Pass back request data
         request.setAttribute("results", results);
+        request.setAttribute("q", query);
+        request.setAttribute("numResultsToSkip", numResultsToSkip);
+        request.setAttribute("numResultsToReturn", numResultsToReturn);
 
         request.getRequestDispatcher("/searchResults.jsp").forward(request, response);
     }
