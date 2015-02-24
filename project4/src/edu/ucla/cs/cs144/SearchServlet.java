@@ -35,13 +35,14 @@ public class SearchServlet extends HttpServlet implements Servlet {
             numResultsToReturn = 10;
 
         SearchResult[] results = AuctionSearchClient.basicSearch(query, numResultsToSkip, numResultsToReturn);
+        SearchResult[] moreResults = AuctionSearchClient.basicSearch(query, numResultsToSkip+numResultsToReturn, 1);
 
         // Pass back request data
         request.setAttribute("results", results);
         request.setAttribute("q", query);
         request.setAttribute("numResultsToSkip", numResultsToSkip);
         request.setAttribute("numResultsToReturn", numResultsToReturn);
-
+        request.setAttribute("hasMore", moreResults.length == 1);
         request.getRequestDispatcher("/searchResults.jsp").forward(request, response);
     }
 }

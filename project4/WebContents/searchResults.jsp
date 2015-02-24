@@ -15,7 +15,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
         <input name="numResultsToReturn" type="hidden" value="10"/>
         <input type="submit" value="Submit"/>
     </form>
-    <div> Search Results for Query: ${q}</div>
+    <div> Search Results for <b>${q}</b>:</div>
     <ul>
         <c:forEach var="result" items="${results}">
             <li>
@@ -29,5 +29,20 @@ uri="http://java.sun.com/jsp/jstl/core" %>
     Previous</a>
     <a id="next" href="search?q=${q}&numResultsToSkip=${numResultsToSkip+numResultsToReturn}&numResultsToReturn=${numResultsToReturn}">
         Next</a>
+
+    <script type="text/javascript">
+        var numResultsToSkip = parseInt("${numResultsToSkip}");
+
+        var prev = document.getElementById("prev");
+
+        if (numResultsToSkip <= 0) {
+            prev.innerHTML = "";
+        }
+
+        var next = document.getElementById("next");
+        if (!${hasMore}) {
+            next.innerHTML = "";
+        }
+    </script>
 </body>
 </html>
