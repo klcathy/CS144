@@ -14,6 +14,8 @@ public class SearchServlet extends HttpServlet implements Servlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         String query = "";
+        int defaultSkip = 0;
+        int defaultReturn = 10;
         int numResultsToSkip = 0;
         int numResultsToReturn = 10;
 
@@ -22,17 +24,17 @@ public class SearchServlet extends HttpServlet implements Servlet {
             query = request.getParameter("q");
         }
         if (request.getParameter("numResultsToSkip") != null) {
-            numResultsToSkip = Integer.parseInt(request.getParameter("numResultsToSkip"));
+            numResultsToSkip = stringToInt(request.getParameter("numResultsToSkip"), defaultSkip);
         }
         if (request.getParameter("numResultsToReturn") != null) {
-            numResultsToReturn = Integer.parseInt(request.getParameter("numResultsToReturn"));
+            numResultsToReturn = stringToInt(request.getParameter("numResultsToReturn"), defaultReturn);
         }
 
         // No negative int parameters allowed
         if (numResultsToSkip < 0)
-            numResultsToSkip = 0;
+            numResultsToSkip = defaultSkip;
         if (numResultsToReturn < 0)
-            numResultsToReturn = 10;
+            numResultsToReturn = defaultReturn;
 
         SearchResult[] results = AuctionSearchClient.basicSearch(query, numResultsToSkip, numResultsToReturn);
         SearchResult[] moreResults = AuctionSearchClient.basicSearch(query, numResultsToSkip+numResultsToReturn, 1);
@@ -44,5 +46,15 @@ public class SearchServlet extends HttpServlet implements Servlet {
         request.setAttribute("numResultsToReturn", numResultsToReturn);
         request.setAttribute("hasMore", moreResults.length == 1);
         request.getRequestDispatcher("/searchResults.jsp").forward(request, response);
+    }
+
+    public int stringToInt(String s, int defaultVal) {
+        int result;
+        try {
+            result = Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            result = defaultVal;
+        }
+        return result;
     }
 }
