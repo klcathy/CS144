@@ -3,14 +3,7 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>eBay Keyword Search</title>
-
-    <script type="text/javascript" src="js/autosuggest.js"></script>
-    <script type="text/javascript" src="js/suggestions.js"></script>
-    <script type="text/javascript">
-        window.onload = function () {
-            var oTextbox = new AutoSuggestControl(document.getElementById("txt1"), new SuggestionList());
-        }
-        </script>
+    <link rel="stylesheet" type="text/css" href="css/main.css">
 </head>
 <body>
     <h1>Keyword Search</h1>
@@ -18,12 +11,24 @@
     <br/>
 
     <form action="/eBay/search" method="GET">
-        <div> Please enter keywords to search for </div>
-        <input name="q" type="text" id="txt1"/>
+        <div class="searchContainer">
+            <div>
+                <span>Please enter keywords to search for:</span> <br/>
+                <input name="q" type="text" id="searchBox"/>
+                <input id="submit" type="submit" value="Submit"/>
+            </div>
+            <div class="suggestions"></div>
+        </div>
         <input name="numResultsToSkip" type="hidden" value="0"/>
         <input name="numResultsToReturn" type="hidden" value="10"/>
-        <input type="submit" value="Submit"/>
     </form>
+    <script type="text/javascript" src="js/autosuggest.js"></script>
+    <script type="text/javascript" src="js/suggestions.js"></script>
+    <script type="text/javascript">
+        window.onload = function () {
+            var oTextbox = new AutoSuggestControl(document.getElementById("searchBox"), new SuggestionList());
+        }
+    </script>
 
 </body>
 </html>
