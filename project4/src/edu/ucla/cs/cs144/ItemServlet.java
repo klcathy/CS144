@@ -1,5 +1,6 @@
 package edu.ucla.cs.cs144;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import javax.servlet.Servlet;
@@ -11,8 +12,11 @@ import javax.servlet.http.HttpServletResponse;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 public class ItemServlet extends HttpServlet implements Servlet {
 
@@ -23,8 +27,11 @@ public class ItemServlet extends HttpServlet implements Servlet {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder builder = factory.newDocumentBuilder();
+            //xml.replaceAll(">\\s+<", "><");
+            //ByteArrayInputStream encXML = new ByteArrayInputStream(xml.getBytes());
             StringReader reader = new StringReader(xml);
-            InputSource is = new InputSource(reader);
+            InputSource is = new InputSource();
+            is.setCharacterStream(reader);
             Document doc = builder.parse(is);
             return doc;
 
@@ -42,7 +49,7 @@ public class ItemServlet extends HttpServlet implements Servlet {
         if (request.getParameter("id") != null) {
             query = request.getParameter("id");
         }
-
+        request.setAttribute("id", query);
         String xml = AuctionSearchClient.getXMLDataForItemId(query);
         request.setAttribute("xml", xml);
 

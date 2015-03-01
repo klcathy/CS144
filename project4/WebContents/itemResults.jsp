@@ -8,6 +8,11 @@ uri="http://java.sun.com/jsp/jstl/core" %>
 </head>
 
 <body>
+    <form action="/eBay/item" method="GET">
+        <div> Please enter an item ID to search for </div>
+        <input name="id" type="text"/>
+        <input type="submit" value="Submit"/>
+    </form>
     <div> Search Results for <b>${id}</b>:</div>
 
     <div> ${xml} </div>
