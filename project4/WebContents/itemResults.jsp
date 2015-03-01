@@ -20,10 +20,29 @@ uri="http://java.sun.com/jsp/jstl/core" %>
         <c:otherwise>
             <h2>ID: ${Item.itemID} </h2>
             <h2>Name: ${Item.name}</h2>
+            <h2> Categories: </h2>
+            <ul>
+                <c:forEach var="category" items="${Item.categories}">
+                    <li>${category}</li>
+                </c:forEach>
+            </ul>
             <h2>Currently: ${Item.currently}</h2>
             <h2>First Bid: ${Item.firstBid} </h2>
             <h2>Buy Price: ${Item.buyPrice}</h2>
             <h2>Num Bids: ${Item.numBids}</h2>
+            <h2> Bids: </h2>
+            <ol>
+                <c:forEach var="bid" items="${Item.bids}">
+                    <li>
+                        <p> Time: ${bid.bidTime} </p>
+                        <p> Amount: ${bid.bidAmount}</p>
+                        <p> User: ${bid.bidderID} </p>
+                        <p> Rating: ${bid.bidderRating} </p>
+                        <p> Bidder Location: ${bid.bidderLocation} </p>
+                        <p> Bidder Country: ${bid.bidderCountry} </p>
+                    </li>
+                </c:forEach>
+            </ol>
             <h2>Location: ${Item.location} </h2>
             <h2>Country: ${Item.country}</h2>
             <h2>Started: ${Item.started}</h2>

@@ -22,6 +22,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Document;
 
 public class MyParser {
+    static int maxDescriptionLength = 4000;
+
     static String formatDate(String str) {
         SimpleDateFormat parseFormat = new SimpleDateFormat("MMM-dd-yy HH:mm:ss");
         SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -98,67 +100,71 @@ public class MyParser {
         }
     }
 
-    static ItemResult parseXML(Element root) throws Exception {
+    static ItemResult parseXML(Element currentItem) throws Exception {
         ItemResult item = new ItemResult();
 
         // Get all properties of current Item
-        String item_id = getAttributeText(root, "ItemID");
-        String name = getElementTextByTagNameNR(root, "Name");
-        String currently = getElementTextByTagNameNR(root, "Currently");
-        String first_bid = getElementTextByTagNameNR(root, "First_Bid");
-        String buy_price = getElementTextByTagNameNR(root, "Buy_Price");
-        String num_bids = getElementTextByTagNameNR(root, "Number_of_Bids");
-        String started = formatDate(getElementTextByTagNameNR(root, "Started"));
-        String ends = formatDate(getElementTextByTagNameNR(root, "Ends"));
-        String description = getElementTextByTagNameNR(root, "Description");
-        description = description.replace("\"", "\\\""); // what's this for?
-        String seller_id = (getElementByTagNameNR(root, "Seller")).getAttribute("UserID");
-        String location = getElementTextByTagNameNR(root, "Location");
-        Element locationElement = getElementByTagNameNR(root, "Location");
+        String item_id = getAttributeText(currentItem, "ItemID");
+        String name = getElementTextByTagNameNR(currentItem, "Name");
+        String currently = getElementTextByTagNameNR(currentItem, "Currently");
+        String first_bid = getElementTextByTagNameNR(currentItem, "First_Bid");
+        String buy_price = getElementTextByTagNameNR(currentItem, "Buy_Price");
+        String num_bids = getElementTextByTagNameNR(currentItem, "Number_of_Bids");
+        String started = formatDate(getElementTextByTagNameNR(currentItem, "Started"));
+        String ends = formatDate(getElementTextByTagNameNR(currentItem, "Ends"));
+        String description = getElementTextByTagNameNR(currentItem, "Description");
+        if (description.length() > maxDescriptionLength)
+            description = description.substring(0, maxDescriptionLength); // truncate string to 4000 chars
+
+        String location = getElementTextByTagNameNR(currentItem, "Location");
+        Element locationElement = getElementByTagNameNR(currentItem, "Location");
         String longitude = locationElement.getAttribute("Longitude");
         String latitude = locationElement.getAttribute("Latitude");
-        String item_country = getElementTextByTagNameNR(root, "Country");
+        String item_country = getElementTextByTagNameNR(currentItem, "Country");
 
-        // Construct the Seller
-        String seller_rating = (getElementByTagNameNR(root, "Seller")).getAttribute("Rating");
+        // Get seller information
+        String seller_id = (getElementByTagNameNR(currentItem, "Seller")).getAttribute("UserID");
+        String seller_rating = (getElementByTagNameNR(currentItem, "Seller")).getAttribute("Rating");
+
+        // Get all catgories of current Item
+        Element[] categories = getElementsByTagNameNR(currentItem, "Category");
+        ArrayList<String> categoriesList = new ArrayList<String>();
+        for (Element category : categories) {
+            categoriesList.add(category.getTextContent());
+        }
+        String[] categoryArray = new String[categoriesList.size()];
+        categoryArray = categoriesList.toArray(categoryArray);
+
+        // Get all Bid children of Bids
+        Element bidsRoot = getElementByTagNameNR(currentItem, "Bids");
+        Element[] bids = getElementsByTagNameNR(bidsRoot, "Bid");
+        ArrayList<BidResult> bidList = new ArrayList<BidResult>();
+        for (Element bid : bids) {
+            // Construct the Bidder for current Bid
+            Element bidder = getElementByTagNameNR(bid, "Bidder");
+            String bidder_id = bidder.getAttribute("UserID");
+            String bidder_rating = bidder.getAttribute("Rating");
+            String bidder_location = getElementTextByTagNameNR(bidder, "Location");
+            String country = getElementTextByTagNameNR(bidder, "Country");
+
+            // Construct the current Bid
+            String time = formatDate(getElementTextByTagNameNR(bid, "Time"));
+            String amount = getElementTextByTagNameNR(bid, "Amount");
+
+            BidResult currBid = new BidResult(bidder_id, bidder_rating, time, amount);
+            currBid.setLocationInfo(bidder_location, country);
+            bidList.add(currBid);
+        }
+        Collections.sort(bidList);
+        BidResult[] bidArray = new BidResult[bidList.size()];
+        bidArray = bidList.toArray(bidArray);
 
         ItemResult ir = new ItemResult(item_id, name, currently, first_bid, num_bids, started, ends, seller_id, seller_rating, description);
         ir.setBuyPrice(buy_price);
         ir.setLocationInfo(location, item_country, longitude, latitude);
+        ir.setCategories(categoryArray);
+        ir.setBids(bidArray);
 
         return ir;
-//
-//        Element locationElement = getElementByTagNameNR(item, "location");
-//        String longitude = locationElement.getAttribute("longitude");
-//        String latitude = locationElement.getAttribute("latitude");
-//
-//        // Construct ItemCategory object for current Item
-//        Element[] categories = getElementsByTagNameNR(item, "category");
-//        ArrayList<String> categoriesList = new ArrayList<String>();
-//        for (Element category : categories) {
-//            categoriesList.add(category.getTextContent());
-//        }
-//
-
-        // Get all Bid children of Bids
-//        Element bidsRoot = getElementByTagNameNR(item, "bids");
-//        Element[] bids = getElementsByTagNameNR(bidsRoot, "bid");
-//
-//        for (Element bid : bids) {
-//            // Construct the Bidder for current Bid
-//            Element bidder = getElementByTagNameNR(bid, "bidder");
-//            String bidder_id = bidder.getAttribute("userid");
-//            String bidder_location = getElementTextByTagNameNR(bidder, "location");
-//            String country = getElementTextByTagNameNR(bidder, "country");
-//
-//            // Construct the current Bid
-//            String time = formatDate(getElementTextByTagNameNR(bid, "time"));
-//            String amount = getElementTextByTagNameNR(bid, "amount");
-//        }
-
-
-        //return ir;
-      //  }
-        //return new ItemResult();
     }
 }

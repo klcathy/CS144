@@ -1,9 +1,5 @@
 package edu.ucla.cs.cs144;
 
-import java.io.*;
-import java.text.*;
-import java.util.*;
-
 public class ItemResult {
 
     private String itemID;
@@ -21,6 +17,8 @@ public class ItemResult {
     private String sellerID;
     private String rating;
     private String description;
+    private String[] categories;
+    private BidResult[] bids;
 
     public ItemResult() {}
 
@@ -56,6 +54,22 @@ public class ItemResult {
             this.longitude = "N/A";
             this.latitude = "N/A";
         }
+    }
+
+    public void setCategories (String[] categories) {
+        this.categories = categories;
+    }
+
+    public void setBids(BidResult[] bids) {
+        this.bids = bids;
+    }
+
+    public String[] getCategories() {
+        return categories;
+    }
+
+    public BidResult[] getBids() {
+        return bids;
     }
 
     public String getItemID() {
