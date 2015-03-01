@@ -7,61 +7,66 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.FactoryConfigurationError;
-import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
 
 public class ItemServlet extends HttpServlet implements Servlet {
-       
+
     public ItemServlet() {}
+
+    public static Document stringToDocument(String xml)
+    {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        try {
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            StringReader reader = new StringReader(xml);
+            InputSource is = new InputSource(reader);
+            Document doc = builder.parse(is);
+            return doc;
+
+        } catch (Exception e) {
+
+        }
+
+        return null;
+    }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         String query = "";
-        String test = "";
 
         if (request.getParameter("id") != null) {
             query = request.getParameter("id");
         }
 
-          String xml = AuctionSearchClient.getXMLDataForItemId(query);
-//
-//        DocumentBuilderFactory fac = DocumentBuilderFactory.newInstance();
-//        DocumentBuilder b;
-//
-//        Document doc = null;
-//        try {
-//            b = fac.newDocumentBuilder();
-//            InputSource is = new InputSource(new StringReader(xml));
-//            doc = b.parse(is);
-//        } catch (Exception e) {
-//            // do something
-//        }
-        test = "zzzzzzzzzz";
-        ItemResult result = null;
-        try {
-            result = MyParser.parseXML(xml);
-            test = result.getItemId();
-
-        }
-        catch (Exception e) {
-            // do something
-            e.printStackTrace();
-        }
-
-        request.setAttribute("test", test);
-
+        String xml = AuctionSearchClient.getXMLDataForItemId(query);
         request.setAttribute("xml", xml);
-        if (result != null) {
-            request.setAttribute("result", result);
-        } else {
-            request.setAttribute("no", "why");
+
+        // Item does not exist
+        if (xml == null || xml.isEmpty()) {
+            request.setAttribute("xml", "");
+            request.getRequestDispatcher("/itemResults.jsp").forward(request, response);
+            return;
         }
 
-        request.getRequestDispatcher("/getItemResults.jsp").forward(request, response);
+        ItemResult item = new ItemResult();
+
+        try {
+            Document doc = stringToDocument(xml);
+            Element root = doc.getDocumentElement();
+            item = MyParser.parseXML(root);
+
+        } catch (Exception e) {
+
+        }
+
+        request.setAttribute("Item", item);
+        request.getRequestDispatcher("/itemResults.jsp").forward(request, response);
 
     }
+
 }

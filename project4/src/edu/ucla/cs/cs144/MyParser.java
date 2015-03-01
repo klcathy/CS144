@@ -98,89 +98,35 @@ public class MyParser {
         }
     }
 
-    static ItemResult parseXML(String xml) throws Exception {
-        DocumentBuilderFactory fac = DocumentBuilderFactory.newInstance();
-        DocumentBuilder b;
+    static ItemResult parseXML(Element root) throws Exception {
+        ItemResult item = new ItemResult();
 
-        Document doc = null;
-        try {
-            b = fac.newDocumentBuilder();
-            InputSource is = new InputSource(new StringReader(xml));
-            doc = b.parse(is);
-        } catch (Exception e) {
-            // do something
-            //e.printStackTrace();
-           // System.exit(3);
-        }
+        // Get all properties of current Item
+        String item_id = getAttributeText(root, "ItemID");
+        String name = getElementTextByTagNameNR(root, "Name");
+        String currently = getElementTextByTagNameNR(root, "Currently");
+        String first_bid = getElementTextByTagNameNR(root, "First_Bid");
+        String buy_price = getElementTextByTagNameNR(root, "Buy_Price");
+        String num_bids = getElementTextByTagNameNR(root, "Number_of_Bids");
+        String started = formatDate(getElementTextByTagNameNR(root, "Started"));
+        String ends = formatDate(getElementTextByTagNameNR(root, "Ends"));
+        String description = getElementTextByTagNameNR(root, "Description");
+        description = description.replace("\"", "\\\""); // what's this for?
+        String seller_id = (getElementByTagNameNR(root, "Seller")).getAttribute("UserID");
+        String location = getElementTextByTagNameNR(root, "Location");
+        Element locationElement = getElementByTagNameNR(root, "Location");
+        String longitude = locationElement.getAttribute("Longitude");
+        String latitude = locationElement.getAttribute("Latitude");
+        String item_country = getElementTextByTagNameNR(root, "Country");
 
-        Element item = doc.getDocumentElement();
+        // Construct the Seller
+        String seller_rating = (getElementByTagNameNR(root, "Seller")).getAttribute("Rating");
 
-        // Get all Item children of Items
-        //Element[] items = getElementsByTagNameNR(root, "Item");
+        ItemResult ir = new ItemResult(item_id, name, currently, first_bid, num_bids, started, ends, seller_id, seller_rating, description);
+        ir.setBuyPrice(buy_price);
+        ir.setLocationInfo(location, item_country, longitude, latitude);
 
-        //for (Element item : items) {
-//            String item_id = item.getAttribute("ItemID");
-//
-//            // Get all properties of current Item
-//            String name = getElementTextByTagNameNR(item, "Name");
-//            String currently = getElementTextByTagNameNR(item, "Currently");
-//            String first_bid = getElementTextByTagNameNR(item, "First_Bid");
-//            String buy_price = getElementTextByTagNameNR(item, "Buy_Price");
-//            String num_bids = getElementTextByTagNameNR(item, "Number_of_Bids");
-//            String started = formatDate(getElementTextByTagNameNR(item, "Started"));
-//            String ends = formatDate(getElementTextByTagNameNR(item, "Ends"));
-//            String description = getElementTextByTagNameNR(item, "Description");
-//            description = description.replace("\"", "\\\""); // what's this for?
-//            String seller_id = (getElementByTagNameNR(item, "Seller")).getAttribute("UserID");
-//            String location = getElementTextByTagNameNR(item, "Location");
-//            String item_country = getElementTextByTagNameNR(item, "Country");
-//
-//            Element locationElement = getElementByTagNameNR(item, "Location");
-//            String longitude = locationElement.getAttribute("Longitude");
-//            String latitude = locationElement.getAttribute("Latitude");
-//
-//            // Construct ItemCategory object for current Item
-//            Element[] categories = getElementsByTagNameNR(item, "Category");
-//            ArrayList<String> categoriesList = new ArrayList<String>();
-//            for (Element category : categories) {
-//                categoriesList.add(category.getTextContent());
-//            }
-//
-//            // Construct the Seller
-//            String seller_rating = (getElementByTagNameNR(item, "Seller")).getAttribute("Rating");
-//
-//            // Get all Bid children of Bids
-//            Element bidsRoot = getElementByTagNameNR(item, "Bids");
-//            Element[] bids = getElementsByTagNameNR(bidsRoot, "Bid");
-//
-//            for (Element bid : bids) {
-//                // Construct the Bidder for current Bid
-//                Element bidder = getElementByTagNameNR(bid, "Bidder");
-//                String bidder_id = bidder.getAttribute("UserID");
-//                String bidder_location = getElementTextByTagNameNR(bidder, "Location");
-//                String country = getElementTextByTagNameNR(bidder, "Country");
-//
-//                // Construct the current Bid
-//                String time = formatDate(getElementTextByTagNameNR(bid, "Time"));
-//                String amount = getElementTextByTagNameNR(bid, "Amount");
-//            }
-
-            String item_id = "weeee";
-
-
-//        // Get all properties of current Item
-//        String name = getElementTextByTagNameNR(item, "name");
-//        String currently = getElementTextByTagNameNR(item, "currently");
-//        String first_bid = getElementTextByTagNameNR(item, "first_bid");
-//        String buy_price = getElementTextByTagNameNR(item, "buy_price");
-//        String num_bids = getElementTextByTagNameNR(item, "number_of_bids");
-//        String started = formatDate(getElementTextByTagNameNR(item, "started"));
-//        String ends = formatDate(getElementTextByTagNameNR(item, "ends"));
-//        String description = getElementTextByTagNameNR(item, "description");
-//        description = description.replace("\"", "\\\""); // what's this for?
-//        String seller_id = (getElementByTagNameNR(item, "seller")).getAttribute("userid");
-//        String location = getElementTextByTagNameNR(item, "location");
-//        String item_country = getElementTextByTagNameNR(item, "country");
+        return ir;
 //
 //        Element locationElement = getElementByTagNameNR(item, "location");
 //        String longitude = locationElement.getAttribute("longitude");
@@ -193,8 +139,6 @@ public class MyParser {
 //            categoriesList.add(category.getTextContent());
 //        }
 //
-//        // Construct the Seller
-//        String seller_rating = (getElementByTagNameNR(item, "seller")).getAttribute("rating");
 
         // Get all Bid children of Bids
 //        Element bidsRoot = getElementByTagNameNR(item, "bids");
@@ -212,12 +156,7 @@ public class MyParser {
 //            String amount = getElementTextByTagNameNR(bid, "amount");
 //        }
 
-//        ItemResult ir = new ItemResult(item_id, name, currently, first_bid, num_bids, started, ends, seller_id, seller_rating, description);
-//
-//        ir.setBuyPrice(buy_price);
-//        ir.setLocationInfo(location, item_country, longitude, latitude);
 
-        return new ItemResult("hey");
         //return ir;
       //  }
         //return new ItemResult();
