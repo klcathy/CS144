@@ -3,11 +3,22 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>miniBay Keyword Search</title>
+
+    <script type="text/javascript" src="autosuggest.js"></script>
+    <script type="text/javascript" src="suggestions.js"></script>
+    <script type="text/javascript">
+        window.onload = function () {
+            var oTextbox = new AutoSuggestControl(document.getElementById("txt1"), new SuggestionList());
+        }
+        </script>
 </head>
 <body>
     <h1>Keyword Search</h1>
     <a href="/eBay">Home</a>
     <br/>
+
+    <p><input type="text" id="txt1" /></p>
+
     <form action="/eBay/search" method="GET">
         <div> Please enter keywords to search for </div>
         <input name="q" type="text"/>
@@ -15,5 +26,6 @@
         <input name="numResultsToReturn" type="hidden" value="10"/>
         <input type="submit" value="Submit"/>
     </form>
+
 </body>
 </html>
