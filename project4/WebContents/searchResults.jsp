@@ -5,7 +5,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
 <head lang="en">
     <meta charset="UTF-8">
     <title>Search Results</title>
-    <link rel="stylesheet" type="text/css" href="css/main.css">
+    <link rel="stylesheet" type="text/css" href="css/suggest.css">
 </head>
 <body>
     <a href="/eBay">Home</a>
