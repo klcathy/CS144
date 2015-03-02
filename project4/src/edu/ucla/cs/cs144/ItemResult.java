@@ -39,8 +39,6 @@ public class ItemResult {
     public void setBuyPrice (String buy_price) {
         if (buy_price != null)
             this.buy_price = buy_price;
-        else
-            this.buy_price = "N/A";
     }
 
     public void setLocationInfo (String location, String country, String longitude, String latitude) {
@@ -49,10 +47,9 @@ public class ItemResult {
         if (longitude != null) {
             this.longitude = longitude;
             this.latitude = latitude;
-        }
-        else {
-            this.longitude = "N/A";
-            this.latitude = "N/A";
+        } else {
+            this.longitude = "";
+            this.latitude = "";
         }
     }
 

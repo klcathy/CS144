@@ -7,13 +7,16 @@ uri="http://java.sun.com/jsp/jstl/core" %>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <title>Item Results</title>
     <link rel="stylesheet" type="text/css" href="css/maps.css">
-    <script type="text/javascript"
-          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBoHOUcuCmSA5HvNW6wkKsVXIFgJwspz7Q">
-    </script>
-    <script type="text/javascript" src="js/maps.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
 </head>
 
-<body onload="initialize('${Item.location}', ${Item.latitude}, ${Item.longitude})">
+<body onload="initialize('${Item.location}', '${Item.latitude}', '${Item.longitude}')">
+    <div class="row" style="padding-bottom: 25px">
+        <div class="col-md-12 text-center">
+            <a href="/eBay">Home</a>
+        </div>
+    </div>
     <form action="/eBay/item" method="GET">
         <div> Please enter an item ID to search for </div>
         <input name="id" type="text"/>
@@ -64,5 +67,9 @@ uri="http://java.sun.com/jsp/jstl/core" %>
             <h2>Description: ${Item.description}</h2>
         </c:otherwise>
     </c:choose>
+    <script type="text/javascript"
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBoHOUcuCmSA5HvNW6wkKsVXIFgJwspz7Q">
+    </script>
+    <script type="text/javascript" src="js/maps.js"></script>
 </body>
 </html>
