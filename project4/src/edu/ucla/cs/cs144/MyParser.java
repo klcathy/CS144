@@ -1,25 +1,12 @@
 package edu.ucla.cs.cs144;
 
-import java.io.*;
-import java.text.*;
 import java.util.*;
-import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.Element;
 import org.w3c.dom.Text;
-import org.xml.sax.SAXException;
-import org.xml.sax.SAXParseException;
-import org.xml.sax.ErrorHandler;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.util.Date;
-
-import org.xml.sax.InputSource;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.FactoryConfigurationError;
-import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
 
 public class MyParser {
     static int maxDescriptionLength = 4000;
@@ -101,7 +88,6 @@ public class MyParser {
     }
 
     static ItemResult parseXML(Element currentItem) throws Exception {
-        ItemResult item = new ItemResult();
 
         // Get all properties of current Item
         String item_id = getAttributeText(currentItem, "ItemID");

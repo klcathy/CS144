@@ -1,8 +1,5 @@
 package edu.ucla.cs.cs144;
 
-/**
- * Created by Roger on 3/1/2015.
- */
 public class BidResult implements Comparable<BidResult> {
     private String bidderID;
     private String bidderRating;
