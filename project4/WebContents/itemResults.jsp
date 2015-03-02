@@ -4,18 +4,47 @@ uri="http://java.sun.com/jsp/jstl/core" %>
 <html>
 <head lang="en">
     <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <title>Item Results</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <script type="text/javascript"
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBoHOUcuCmSA5HvNW6wkKsVXIFgJwspz7Q">
+    </script>
+    <script type= "text/javascript">
+        function initialize(latitude, longitude) {
+            var geocoder = new google.maps.Geocoder();
+            var map;
+            var latlng = new google.maps.LatLng(latitude, longitude);
+            var myOptions = {
+              zoom: 14, // default is 8
+              center: latlng,
+              mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            map = new google.maps.Map(document.getElementById("map_canvas"),
+                myOptions);
+
+            geocoder.geocode( { 'location': latlng}, function(results, status) {
+              if (status == google.maps.GeocoderStatus.OK) {
+                map.setCenter(results[0].geometry.location);
+                var marker = new google.maps.Marker({
+                    map: map,
+                    position: results[0].geometry.location
+                });
+              } else {
+                alert("Geocode was not successful for the following reason: " + status);
+              }
+            });
+        }
+    </script>
 </head>
 
-<body>
+<body onload="initialize(${Item.latitude}, ${Item.longitude})">
     <form action="/eBay/item" method="GET">
         <div> Please enter an item ID to search for </div>
         <input name="id" type="text"/>
         <input type="submit" value="Submit"/>
     </form>
     <div> Search Results for <b>${id}</b>:</div>
-
-    <div> ${xml} </div>
     <br/>
 
     <c:choose>
@@ -23,6 +52,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
             <h2> Item does not exist! </h2>
         </c:when>
         <c:otherwise>
+            <div id="map_canvas"></div>
             <h2>ID: ${Item.itemID} </h2>
             <h2>Name: ${Item.name}</h2>
             <h2> Categories: </h2>
@@ -60,5 +90,4 @@ uri="http://java.sun.com/jsp/jstl/core" %>
         </c:otherwise>
     </c:choose>
 </body>
-
 </html>
