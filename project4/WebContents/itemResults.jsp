@@ -27,23 +27,38 @@ uri="http://java.sun.com/jsp/jstl/core" %>
 
     <c:choose>
         <c:when test="${empty xml}">
-            <h2> Item does not exist! </h2>
+            <p> Item does not exist! </p>
         </c:when>
         <c:otherwise>
             <div id="map_canvas"></div>
-            <h2>ID: ${Item.itemID} </h2>
-            <h2>Name: ${Item.name}</h2>
-            <h2> Categories: </h2>
+            <p>ID: ${Item.itemID} </p>
+            <p>Name: ${Item.name}</p>
+            <p> Categories: </p>
             <ul>
                 <c:forEach var="category" items="${Item.categories}">
                     <li>${category}</li>
                 </c:forEach>
             </ul>
-            <h2>Currently: ${Item.currently}</h2>
-            <h2>First Bid: ${Item.firstBid} </h2>
-            <h2>Buy Price: ${Item.buyPrice}</h2>
-            <h2>Num Bids: ${Item.numBids}</h2>
-            <h2> Bids: </h2>
+            <p>Description: ${Item.description}</p>
+            <p>Currently: ${Item.currently}</p>
+            <p>First Bid:
+            <c:choose>
+                <c:when test="${empty Item.firstBid}">N/A</c:when>
+                <c:otherwise>${Item.firstBid}</c:otherwise>
+            </c:choose>
+            </p>
+            <p>Buy Price:
+                <c:choose>
+                    <c:when test="${empty Item.buyPrice}">N/A</c:when>
+                    <c:otherwise>${Item.buyPrice}</c:otherwise>
+                </c:choose>
+            </p>
+            <p> Bids:
+                <c:choose>
+                    <c:when test="${empty Item.numBids}">0</c:when>
+                    <c:otherwise>${Item.numBids}</c:otherwise>
+                </c:choose></p>
+            </p>
             <ol>
                 <c:forEach var="bid" items="${Item.bids}">
                     <li>
@@ -56,15 +71,18 @@ uri="http://java.sun.com/jsp/jstl/core" %>
                     </li>
                 </c:forEach>
             </ol>
-            <h2>Location: ${Item.location} </h2>
-            <h2>Country: ${Item.country}</h2>
-            <h2>Started: ${Item.started}</h2>
-            <h2>Ends: ${Item.ends} </h2>
-            <h2>Longitude: ${Item.longitude}</h2>
-            <h2>Latitude: ${Item.latitude}</h2>
-            <h2>SellerID: ${Item.sellerID} </h2>
-            <h2>Rating: ${Item.rating}</h2>
-            <h2>Description: ${Item.description}</h2>
+            <p> Coordinates(latitude, longitude):
+                 <c:choose>
+                    <c:when test="${empty Item.latitude and empty Item.longitude}">N/A</c:when>
+                    <c:otherwise>(${Item.latitude}, ${Item.longitude})</c:otherwise>
+                 </c:choose>
+            </p>
+            <p>Location: ${Item.location} </p>
+            <p>Country: ${Item.country}</p>
+            <p>Started: ${Item.started}</p>
+            <p>Ends: ${Item.ends} </p>
+            <p>SellerID: ${Item.sellerID} </p>
+            <p>Rating: ${Item.rating}</p>
         </c:otherwise>
     </c:choose>
     <script type="text/javascript"
