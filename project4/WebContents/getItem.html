@@ -3,15 +3,32 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>miniBay Item Search</title>
+    <link rel="stylesheet" type="text/css" href="css/suggest.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/main.css">
 </head>
 <body>
-    <h1>Item Search</h1>
-    <a href="/eBay">Home</a>
-    <br/>
-    <form action="/eBay/item" method="GET">
-        <div> Please enter an item ID to search for </div>
-        <input name="id" type="text"/>
-        <input type="submit" value="Submit"/>
-    </form>
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="text-center">Item Search</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <a href="/eBay">Home</a>
+        </div>
+    </div>
+    <div class="padding"></div>
+    <div class="row">
+        <form action="/eBay/item" method="GET">
+            <div class="col-md-12 text-center">
+                <div>
+                    <span>Please enter an item ID to search for:</span> <br/>
+                    <input type="text" name="id" placeholder="Enter an item ID"/>
+                    <input class="btn btn-primary" id="submit" type="submit" value="Submit"/>
+                </div>
+            </div>
+        </form>
+    </div>
 </body>
 </html>
