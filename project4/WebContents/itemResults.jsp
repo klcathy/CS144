@@ -33,16 +33,20 @@ uri="http://java.sun.com/jsp/jstl/core" %>
 
     <c:choose>
         <c:when test="${empty xml}">
-            <p> Item does not exist! </p>
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <span> Item does not exist! Please try again. </span>
+                </div>
+            </div>
         </c:when>
         <c:otherwise>
         <div class="container">
             <div class="row row-centered">
                 <div class="col-md-4 col-centered col-fixed">
                 <div id="map_canvas"></div>
-                <p>Location: ${Item.location} </p>
-                 <p>Country: ${Item.country}</p>
-                 <p> Coordinates(latitude, longitude):
+                <p><b>Location:</b> ${Item.location} </p>
+                 <p><b>Country:</b> ${Item.country}</p>
+                 <p> <b>Coordinates(latitude, longitude):</b>
                      <c:choose>
                         <c:when test="${empty Item.latitude and empty Item.longitude}">N/A</c:when>
                         <c:otherwise>(${Item.latitude}, ${Item.longitude})</c:otherwise>
@@ -51,38 +55,38 @@ uri="http://java.sun.com/jsp/jstl/core" %>
                 </div>
 
             <div class="col-md-4 col-centered col-fixed">
-                <p>Name: ${Item.name}</p>
-                <p>ID: ${Item.itemID} </p>
-                <p> Categories: </p>
+                <p><b>Name:</b> ${Item.name}</p>
+                <p><b>ID:</b> ${Item.itemID} </p>
+                <p> <b>Categories:</b> </p>
                 <ul>
                     <c:forEach var="category" items="${Item.categories}">
                         <li>${category}</li>
                     </c:forEach>
                 </ul>
-                <p>Description: ${Item.description}</p>
+                <p><b>Description:</b> ${Item.description}</p>
             </div>
 
 
             <div class="col-md-4 col-centered col-fixed">
-                <p>Currently: ${Item.currently}</p>
+                <p><b>Currently:</b> ${Item.currently}</p>
 
-                 <p>Started: ${Item.started}</p>
-                 <p>Ends: ${Item.ends} </p>
-                 <p>SellerID: ${Item.sellerID} </p>
-                 <p>Rating: ${Item.rating}</p>
-                <p>First Bid:
+                 <p><b>Started:</b> ${Item.started}</p>
+                 <p><b>Ends:</b> ${Item.ends} </p>
+                 <p><b>SellerID:</b> ${Item.sellerID} </p>
+                 <p><b>Rating:</b> ${Item.rating}</p>
+                <p><b>First Bid:</b>
                 <c:choose>
                     <c:when test="${empty Item.firstBid}">N/A</c:when>
                     <c:otherwise>${Item.firstBid}</c:otherwise>
                 </c:choose>
                 </p>
-                <p>Buy Price:
+                <p><b>Buy Price:</b>
                     <c:choose>
                         <c:when test="${empty Item.buyPrice}">N/A</c:when>
                         <c:otherwise>${Item.buyPrice}</c:otherwise>
                     </c:choose>
                 </p>
-                <p> Bids:
+                <p> <b>Bids:</b>
                     <c:choose>
                         <c:when test="${empty Item.numBids}">0</c:when>
                         <c:otherwise>${Item.numBids}</c:otherwise>
@@ -91,12 +95,12 @@ uri="http://java.sun.com/jsp/jstl/core" %>
                 <ol>
                     <c:forEach var="bid" items="${Item.bids}">
                         <li>
-                            <p> Time: ${bid.bidTime} </p>
-                            <p> Amount: ${bid.bidAmount}</p>
-                            <p> User: ${bid.bidderID} </p>
-                            <p> Rating: ${bid.bidderRating} </p>
-                            <p> Bidder Location: ${bid.bidderLocation} </p>
-                            <p> Bidder Country: ${bid.bidderCountry} </p>
+                            <p> <i>Time:</i> ${bid.bidTime} </p>
+                            <p> <i>Amount:</i> ${bid.bidAmount}</p>
+                            <p> <i>User:</i> ${bid.bidderID} </p>
+                            <p> <i>Rating:</i> ${bid.bidderRating} </p>
+                            <p> <i>Bidder Location:</i> ${bid.bidderLocation} </p>
+                            <p> <i>Bidder Country:</i> ${bid.bidderCountry} </p>
                         </li>
                     </c:forEach>
                 </ol>
