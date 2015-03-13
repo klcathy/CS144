@@ -1,0 +1,50 @@
+h1 {
+    font-family: futura;
+}
+
+body {
+    font-size: 16px;
+}
+
+input {
+    width: 30%;
+}
+
+#submit {
+    padding: 4px 12px;
+    width: 10%;
+}
+
+.btn {
+
+    font-size: 16px;
+}
+
+.padding {
+    padding-top: 50px;
+    padding-bottom: 50px;
+}
+
+.container {
+    width: 95%;
+    height: 95%;
+}
+
+.row-centered {
+    text-align:center;
+}
+
+.col-centered {
+    display:inline-block;
+    vertical-align:top;
+    float:none;
+    /* reset the text-align */
+    text-align:left;
+    /* inline-block space fix */
+    margin-right:-4px;
+}
+
+.col-fixed {
+    /* custom width */
+    width: 32%;
+}
