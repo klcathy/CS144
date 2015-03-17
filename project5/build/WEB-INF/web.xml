@@ -1,5 +1,13 @@
 <web-app id="simple" version="2.4">
     <servlet>
+        <servlet-name>CreditCard</servlet-name>
+        <jsp-file>/creditCard.jsp</jsp-file>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CreditCard</servlet-name>
+        <url-pattern>/payment</url-pattern>
+    </servlet-mapping>
+    <servlet>
         <servlet-name>SessionServlet</servlet-name>
         <servlet-class>edu.ucla.cs.cs144.SessionServlet</servlet-class>
     </servlet>
@@ -7,6 +15,18 @@
         <servlet-name>SessionServlet</servlet-name>
         <url-pattern>/session</url-pattern>
     </servlet-mapping>
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Credit Card Session</web-resource-name>
+            <url-pattern>/session</url-pattern>
+            <url-pattern>/payment</url-pattern>
+            <http-method>POST</http-method>
+            <http-method>GET</http-method>
+        </web-resource-collection>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
     <servlet>
         <servlet-name>SearchServlet</servlet-name>
         <servlet-class>edu.ucla.cs.cs144.SearchServlet</servlet-class>

@@ -9,23 +9,42 @@ uri="http://java.sun.com/jsp/jstl/core" %>
     <link rel="stylesheet" type="text/css" href="css/main.css">
 </head>
 <body>
-    <div style = "width: 30%;height: 65%;margin-left: auto;margin-right: auto; margin-top: 15%;">
-        <p>ItemID: <c:out value="${sessionScope.itemId}"/></p>
+    <div style = "width: 40%;height: 65%;margin-left: auto;margin-right: auto; margin-top: 15%;">
+      <div class="form-group">
+        <label class="col-md-4 control-label">ItemID</label>
+        <div class="col-md-8">
+          <p class="form-control-static"><c:out value="${sessionScope.itemId}"/></p>
+        </div>
+      </div>
 
-        <p>Item Name: <c:out value="${sessionScope.name}"/></p>
+    <div class="form-group">
+      <label class="col-md-4 control-label">Item Name</label>
+      <div class="col-md-8">
+        <p class="form-control-static"><c:out value="${sessionScope.name}"/></p>
+      </div>
+    </div>
 
-        <p>Buy Price: <c:out value="${sessionScope.buyPrice}"/></p>
-        <p>
-            <form class="form-horizontal" action="/eBay/session" method="GET">
-              <div class="form-group">
-                <label for="credit_card" class="col-md-3 text-left">Credit Card</label>
-                <div class="col-md-9">
-                  <input type="text" class="form-control" id="credit_card" placeholder="Enter your credit card number">
-                </div>
-              </div>
-           </form>
-       </p>
+    <div class="form-group">
+      <label class="col-md-4 control-label">Buy Price</label>
+      <div class="col-md-8">
+        <p class="form-control-static"><c:out value="${sessionScope.buyPrice}"/></p>
+      </div>
+    </div>
 
-   </div>
+    <form action="/eBay/session" method="POST">
+      <div class="form-group">
+        <label for="credit_card" class="col-md-4 control-label">Credit Card</label>
+        <div class="col-md-8">
+          <input type="text" class="form-control" name="credit_card" placeholder="Enter your credit card number">
+        </div>
+      </div>
+
+      <div class="form-group">
+          <div class="col-md-offset-4 col-md-5">
+            <input style="width:40%; margin-top: 15px;" class="btn btn-primary" type="submit" value="Submit"/>
+          </div>
+      </div>
+    </form>
+  </div>
 </body>
 </html>

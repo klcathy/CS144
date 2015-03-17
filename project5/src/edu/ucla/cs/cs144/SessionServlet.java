@@ -21,8 +21,13 @@ public class SessionServlet extends HttpServlet implements Servlet {
 
         // Get credit card information
         String credit_card_num = request.getParameter("credit_card");
-        session.setAttribute("credit_card_num", credit_card_num);
-
+        session.setAttribute("creditCardNum", credit_card_num);
+        request.getRequestDispatcher("/confirmation.jsp").forward(request, response);
     }
 
+    public void doPost(HttpServletRequest request,
+                       HttpServletResponse response)
+            throws ServletException, IOException {
+        doGet(request, response);
+    }
 }

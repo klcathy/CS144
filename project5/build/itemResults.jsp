@@ -107,7 +107,7 @@ uri="http://java.sun.com/jsp/jstl/core" %>
 
                 <c:choose>
                     <c:when test="${empty Item.buyPrice}"></c:when>
-                    <c:otherwise><a href="creditCard.jsp">Pay Now</a></c:otherwise>
+                    <c:otherwise><a class="btn btn-primary btn-md" href="/eBay/payment">Pay Now</a></c:otherwise>
                 </c:choose>
 
             </div>
