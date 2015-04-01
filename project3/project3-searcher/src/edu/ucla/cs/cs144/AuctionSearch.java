@@ -322,6 +322,7 @@ public class AuctionSearch implements IAuctionSearch {
                 // Description
                 String description = escapeString(itemRS.getString("description"));
                 data += getXMLTag("Description", description);
+                data += "</Item>";
 
                 itemCatRS.close();
                 itemCatStmt.close();
